@@ -17,7 +17,12 @@
     <script src="{{ asset('assets/libs/sweetalert2/script.js') }}"></script>
 
     @php
-        $appSettings = \App\Models\Setting::first() ?? (object)['app_name' => 'Santuario Clínico', 'primary_color' => '#00478d'];
+        $appSettings = \App\Models\Setting::first() ?? (object)[
+            'app_name' => 'Consultia', 
+            'primary_color' => '#00478d',
+            'enabled_modules' => ['consultorios', 'servicios', 'finanzas', 'pacientes']
+        ];
+        $enabledMods = $appSettings->enabled_modules ?? [];
     @endphp
 
     <script>
@@ -56,10 +61,6 @@
     
     <script src="{{ asset('js/jquery.min.js') }}"></script>
 
-    <!-- DataTables -->
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
-    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
-
     <style>
         /* Dark Mode Definitions */
         .dark {
@@ -92,44 +93,19 @@
             color: white !important;
         }
 
-        /* Custom SweetAlert Styling */
         .swal2-popup {
             border-radius: 2rem !important;
             padding: 2rem !important;
             font-family: 'Manrope', sans-serif !important;
         }
         .swal2-title { font-weight: 900 !important; tracking: -0.05em !important; }
-        .swal2-confirm { border-radius: 1rem !important; font-weight: 800 !important; padding: 12px 30px !important; text-transform: uppercase !important; letter-spacing: 0.1em !important; }
-        .swal2-cancel { border-radius: 1rem !important; font-weight: 800 !important; padding: 12px 30px !important; text-transform: uppercase !important; letter-spacing: 0.1em !important; }
+        .swal2-confirm, .swal2-cancel { border-radius: 1rem !important; font-weight: 800 !important; padding: 12px 30px !important; text-transform: uppercase !important; letter-spacing: 0.1em !important; }
         
         /* FAB Animations */
-        .fab-container {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            z-index: 50;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            gap: 15px;
-        }
-        .fab-options {
-            display: none;
-            flex-direction: column;
-            align-items: flex-end;
-            gap: 10px;
-            opacity: 0;
-            transform: translateY(20px);
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        .fab-options.show {
-            display: flex;
-            opacity: 1;
-            transform: translateY(0);
-        }
-        .fab-main-btn.active {
-            transform: rotate(45deg);
-        }
+        .fab-container { position: fixed; bottom: 30px; right: 30px; z-index: 50; display: flex; flex-direction: column; align-items: flex-end; gap: 15px; }
+        .fab-options { display: none; flex-direction: column; align-items: flex-end; gap: 10px; opacity: 0; transform: translateY(20px); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .fab-options.show { display: flex; opacity: 1; transform: translateY(0); }
+        .fab-main-btn.active { transform: rotate(45deg); }
     </style>
 
     <script>
@@ -154,29 +130,43 @@
                     <i class="fa-solid fa-chart-pie text-xl w-6"></i>
                     <span class="text-sm">Panel de Control</span>
                 </a>
+
+                @if(in_array('consultorios', $enabledMods))
                 <a href="{{ route('consultorios.index') }}" class="flex items-center gap-4 px-4 py-3.5 rounded-2xl {{ request()->routeIs('consultorios.*') ? 'sidebar-active' : 'text-on-surface-variant hover:bg-surface-container-low transition-all' }}">
                     <i class="fa-solid fa-hospital text-xl w-6"></i>
                     <span class="text-sm">Mis Consultorios</span>
                 </a>
+                @endif
+
+                @if(in_array('servicios', $enabledMods))
                 <a href="{{ route('servicios.index') }}" class="flex items-center gap-4 px-4 py-3.5 rounded-2xl {{ request()->routeIs('servicios.*') ? 'sidebar-active' : 'text-on-surface-variant hover:bg-surface-container-low transition-all' }}">
                     <i class="fa-solid fa-stethoscope text-xl w-6"></i>
                     <span class="text-sm">Servicios</span>
                 </a>
+                @endif
+
+                @if(in_array('finanzas', $enabledMods))
                 <a href="{{ route('metodos.index') }}" class="flex items-center gap-4 px-4 py-3.5 rounded-2xl {{ request()->routeIs('metodos.*') ? 'sidebar-active' : 'text-on-surface-variant hover:bg-surface-container-low transition-all' }}">
                     <i class="fa-solid fa-wallet text-xl w-6"></i>
                     <span class="text-sm">Finanzas</span>
                 </a>
+                @endif
+
                 <div class="pt-4 pb-2 px-4">
                     <p class="text-[10px] font-black text-outline uppercase tracking-widest">Atención</p>
                 </div>
+
                 <a href="#" class="flex items-center gap-4 px-4 py-3.5 rounded-2xl text-on-surface-variant hover:bg-surface-container-low transition-all">
                     <i class="fa-solid fa-calendar-check text-xl w-6"></i>
                     <span class="text-sm">Citas Médicas</span>
                 </a>
+
+                @if(in_array('pacientes', $enabledMods))
                 <a href="{{ route('pacientes.index') }}" class="flex items-center gap-4 px-4 py-3.5 rounded-2xl {{ request()->routeIs('pacientes.*') ? 'sidebar-active' : 'text-on-surface-variant hover:bg-surface-container-low transition-all' }}">
                     <i class="fa-solid fa-users text-xl w-6"></i>
                     <span class="text-sm">Pacientes</span>
                 </a>
+                @endif
             </nav>
 
             <div class="pt-6 border-t border-surface-container space-y-2">
@@ -196,13 +186,12 @@
 
         <!-- Main Content -->
         <div class="flex-1 flex flex-col h-full overflow-hidden">
-            <!-- Top Bar -->
             <header class="h-20 bg-white border-b border-surface-container flex items-center justify-between px-10 shrink-0">
                 <div class="flex items-center gap-4">
                     <button class="fa-solid fa-bars lg:hidden text-primary text-xl"></button>
                     <div class="bg-surface-container-low px-5 py-2.5 rounded-full flex items-center gap-3 w-96 border border-transparent focus-within:border-primary/20 focus-within:bg-white transition-all">
                         <i class="fa-solid fa-search text-outline"></i>
-                        <input type="text" placeholder="Búsqueda rápida de pacientes..." class="bg-transparent border-none focus:ring-0 text-sm w-full font-medium placeholder:text-outline">
+                        <input type="text" placeholder="Búsqueda rápida..." class="bg-transparent border-none focus:ring-0 text-sm w-full font-medium placeholder:text-outline">
                     </div>
                 </div>
 
@@ -212,19 +201,14 @@
                     </button>
                     <div class="text-right hidden sm:block">
                         <p class="text-sm font-black text-primary">{{ Auth::user()->name }}</p>
-                        <p class="text-[10px] font-bold text-outline uppercase tracking-widest">{{ Auth::user()->specialty ?? 'Especialista' }}</p>
+                        <p class="text-[10px] font-bold text-outline uppercase tracking-widest text-secondary">{{ Auth::user()->specialty ?? 'Especialista' }}</p>
                     </div>
                     <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-sm overflow-hidden border border-surface-container-highest">
-                        @if(false) {{-- Future: logic for actual avatar --}}
-                            <img src="{{ asset('img/doctor.png') }}" class="w-full h-full object-cover">
-                        @else
-                            <i class="fa-solid fa-user-md text-xl"></i>
-                        @endif
+                        <i class="fa-solid fa-user-doctor text-xl"></i>
                     </div>
                 </div>
             </header>
 
-            <!-- Page Body -->
             <main class="flex-1 overflow-y-auto p-10 bg-surface relative">
                 @yield('content')
             </main>
@@ -238,14 +222,12 @@
                 <span class="text-xs font-bold">Nueva Cita</span>
                 <i class="fa-solid fa-calendar-plus text-lg"></i>
             </a>
+            @if(in_array('pacientes', $enabledMods))
             <a href="{{ route('pacientes.create') }}" class="flex items-center gap-3 px-5 py-3 bg-white text-primary rounded-2xl shadow-xl border border-surface-container hover:bg-primary hover:text-white transition-all">
                 <span class="text-xs font-bold">Nuevo Paciente</span>
                 <i class="fa-solid fa-user-plus text-lg"></i>
             </a>
-            <a href="{{ route('servicios.create') }}" class="flex items-center gap-3 px-5 py-3 bg-white text-primary rounded-2xl shadow-xl border border-surface-container hover:bg-primary hover:text-white transition-all">
-                <span class="text-xs font-bold">Registrar Servicio</span>
-                <i class="fa-solid fa-hand-holding-medical text-lg"></i>
-            </a>
+            @endif
         </div>
         <button id="fab-main-btn" class="w-16 h-16 bg-primary text-white rounded-full shadow-2xl flex items-center justify-center transition-all hover:scale-110 active:scale-95 fab-main-btn">
             <i class="fa-solid fa-plus text-3xl"></i>
@@ -254,10 +236,8 @@
 
     <script>
         $(document).ready(function() {
-            // Theme Toggle
             const themeToggleBtn = $('#theme-toggle');
             const themeIcon = $('#theme-icon');
-
             function updateIcon() {
                 if (document.documentElement.classList.contains('dark')) {
                     themeIcon.removeClass('fa-moon').addClass('fa-sun');
@@ -266,99 +246,35 @@
                 }
             }
             updateIcon();
-
             themeToggleBtn.on('click', function() {
                 document.documentElement.classList.toggle('dark');
-                if (document.documentElement.classList.contains('dark')) {
-                    localStorage.setItem('theme', 'dark');
-                } else {
-                    localStorage.setItem('theme', 'light');
-                }
+                localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
                 updateIcon();
             });
 
-            $('#fab-main-btn').on('click', function() {
-                $(this).toggleClass('active');
-                $('#fab-options').toggleClass('show');
-            });
+            $('#fab-main-btn').on('click', function() { $(this).toggleClass('active'); $('#fab-options').toggleClass('show'); });
+            $(document).on('click', function(e) { if (!$(e.target).closest('.fab-container').length) { $('#fab-main-btn').removeClass('active'); $('#fab-options').removeClass('show'); } });
 
-            $(document).on('click', function(e) {
-                if (!$(e.target).closest('.fab-container').length) {
-                    $('#fab-main-btn').removeClass('active');
-                    $('#fab-options').removeClass('show');
-                }
-            });
-
-            // SweetAlert2 Confirmation for anything with class 'confirm-delete'
             $(document).on('submit', '.confirm-delete', function(e) {
                 e.preventDefault();
                 const form = this;
                 Swal.fire({
-                    title: '¿Estás completamente seguro?',
-                    text: "Esta acción es irreversible y los datos se perderán para siempre.",
+                    title: '¿Confirmar eliminación?',
+                    text: "Esta acción es definitiva y no se puede revertir.",
                     icon: 'warning',
                     showCancelButton: true,
-                    confirmButtonColor: '#d33',
+                    confirmButtonColor: '#ba1a1a',
                     cancelButtonColor: '#00478d',
-                    confirmButtonText: 'Sí, eliminar ahora',
+                    confirmButtonText: 'Eliminar',
                     cancelButtonText: 'Cancelar',
                     background: document.documentElement.classList.contains('dark') ? '#1a1c1e' : '#fff',
                     color: document.documentElement.classList.contains('dark') ? '#fff' : '#191c1e'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        form.submit();
-                    }
-                });
+                }).then((result) => { if (result.isConfirmed) form.submit(); });
             });
 
-            // Notifications logic
-            const toastConfig = {
-                toast: true,
-                position: 'top-end',
-                showConfirmButton: false,
-                timer: 4000,
-                timerProgressBar: true,
-                didOpen: (toast) => {
-                    toast.addEventListener('mouseenter', Swal.stopTimer)
-                    toast.addEventListener('mouseleave', Swal.resumeTimer)
-                }
-            };
-
-            @if (Session::has('success'))
-                Swal.fire({
-                    ...toastConfig,
-                    icon: 'success',
-                    title: "{{ Session::get('title', '¡Correcto!') }}",
-                    text: "{{ Session::get('success') }}"
-                });
-            @endif
-
-            @if (Session::has('error'))
-                Swal.fire({
-                    ...toastConfig,
-                    icon: 'error',
-                    title: "{{ Session::get('title', '¡Error!') }}",
-                    text: "{{ Session::get('error') }}"
-                });
-            @endif
-
-            @if (Session::has('info'))
-                Swal.fire({
-                    ...toastConfig,
-                    icon: 'info',
-                    title: "{{ Session::get('title', 'Información') }}",
-                    text: "{{ Session::get('info') }}"
-                });
-            @endif
-
-            @if (Session::has('warning'))
-                Swal.fire({
-                    ...toastConfig,
-                    icon: 'warning',
-                    title: "{{ Session::get('title', 'Atención') }}",
-                    text: "{{ Session::get('warning') }}"
-                });
-            @endif
+            const toastConfig = { toast: true, position: 'top-end', showConfirmButton: false, timer: 3500, timerProgressBar: true };
+            @if (Session::has('success')) Swal.fire({ ...toastConfig, icon: 'success', title: "{{ Session::get('success') }}" }); @endif
+            @if (Session::has('error')) Swal.fire({ ...toastConfig, icon: 'error', title: "{{ Session::get('error') }}" }); @endif
         });
     </script>
 </body>

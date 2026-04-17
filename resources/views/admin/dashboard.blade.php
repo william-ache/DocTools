@@ -1,154 +1,145 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="space-y-10">
+@php
+    $appSettings = \App\Models\Setting::first();
+    $favorites = $appSettings->favorite_modules ?? [];
+    $enabled = $appSettings->enabled_modules ?? [];
+    
+    $moduleMap = [
+        'consultorios' => ['Mis Consultorios', 'Gestión de sedes', 'fa-hospital', route('consultorios.index')],
+        'servicios' => ['Servicios Médicos', 'Catálogo de precios', 'fa-stethoscope', route('servicios.index')],
+        'finanzas' => ['Finanzas y Pagos', 'Cuentas de cobro', 'fa-wallet', route('metodos.index')],
+        'pacientes' => ['Directorio Pacientes', 'Historias clínicas', 'fa-users', route('pacientes.index')]
+    ];
+@endphp
+
+<div class="space-y-10 pb-20">
     <!-- Mensaje de Bienvenida -->
+    <div class="fade-element flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+        <div>
+            <h1 class="text-4xl font-extrabold text-primary tracking-tighter mb-2">¡Hola, {{ Auth::user()->name }}!</h1>
+            <p class="text-on-surface-variant font-medium text-lg italic opacity-80">"Haciendo lo que amamos: Cuidando cada respiro."</p>
+        </div>
+        <div class="bg-white px-6 py-3 rounded-2xl border border-surface-container shadow-sm flex items-center gap-4">
+            <i class="fa-solid fa-calendar-day text-primary"></i>
+            <span class="text-sm font-black text-primary uppercase tracking-widest">{{ now()->translatedFormat('l, d F Y') }}</span>
+        </div>
+    </div>
+
+    @if(count($favorites) > 0)
+    <!-- Dashboard Pins (Favoritos) -->
     <div class="fade-element">
-        <h1 class="text-4xl font-extrabold text-primary tracking-tighter mb-2">¡Bienvenido de vuelta, {{ Auth::user()->name }}!</h1>
-        <p class="text-on-surface-variant font-medium text-lg">Aquí tienes un resumen de tu actividad reciente.</p>
-    </div>
-
-    <!-- Dashboard Stats Grid (Últimos 7 días) -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <!-- Stat Card 1 -->
-        <div class="bg-white p-7 rounded-[2rem] ambient-shadow border border-surface-container transition-all hover:scale-[1.02]">
-            <div class="flex justify-between items-start mb-4">
-                <span class="text-[10px] font-black text-outline uppercase tracking-widest">Últimos 7 días</span>
-                <i class="fa-solid fa-chevron-down text-outline text-xs"></i>
-            </div>
-            <div class="flex items-center gap-3 mb-4">
-                <i class="fa-solid fa-user-plus text-primary opacity-60"></i>
-                <span class="text-xs font-bold text-on-surface-variant uppercase tracking-widest">Nuevos pacientes</span>
-            </div>
-            <div class="flex items-end justify-between">
-                <span class="text-4xl font-black text-primary leading-none">0</span>
-                <span class="text-[10px] font-bold text-error flex items-center gap-1">
-                    <i class="fa-solid fa-arrow-trend-down text-[10px]"></i> -100% vs. 7 días anteriores
-                </span>
-            </div>
-        </div>
-
-        <!-- Stat Card 2 -->
-        <div class="bg-white p-7 rounded-[2rem] ambient-shadow border border-surface-container transition-all hover:scale-[1.02]">
-            <div class="flex justify-between items-start mb-4">
-                <span class="text-[10px] font-black text-outline uppercase tracking-widest">Últimos 7 días</span>
-                <i class="fa-solid fa-chevron-down text-outline text-xs"></i>
-            </div>
-            <div class="flex items-center gap-3 mb-4">
-                <i class="fa-solid fa-calendar-alt text-primary opacity-60"></i>
-                <span class="text-xs font-bold text-on-surface-variant uppercase tracking-widest">Citas agendadas</span>
-            </div>
-            <div class="flex items-end justify-between">
-                <span class="text-4xl font-black text-primary leading-none">2</span>
-                <span class="text-[10px] font-bold text-outline flex items-center gap-1">
-                    <i class="fa-solid fa-minus text-[10px]"></i> 0% vs. 7 días anteriores
-                </span>
-            </div>
-        </div>
-
-        <!-- Stat Card 3 -->
-        <div class="bg-white p-7 rounded-[2rem] ambient-shadow border border-surface-container transition-all hover:scale-[1.02]">
-            <div class="flex justify-between items-start mb-4">
-                <span class="text-[10px] font-black text-outline uppercase tracking-widest">Últimos 7 días</span>
-                <i class="fa-solid fa-chevron-down text-outline text-xs"></i>
-            </div>
-            <div class="flex items-center gap-3 mb-4">
-                <i class="fa-solid fa-circle-check text-primary opacity-60"></i>
-                <span class="text-xs font-bold text-on-surface-variant uppercase tracking-widest">Consultas concretadas</span>
-            </div>
-            <div class="flex items-end justify-between">
-                <span class="text-4xl font-black text-primary leading-none">3</span>
-                <span class="text-[10px] font-bold text-error flex items-center gap-1">
-                    <i class="fa-solid fa-arrow-trend-down text-[10px]"></i> -25% vs. 7 días anteriores
-                </span>
-            </div>
-        </div>
-    </div>
-
-    <!-- Acciones Rápidas -->
-    <div>
-        <h3 class="text-[11px] font-black text-primary uppercase tracking-[0.2em] mb-6">Acciones Rápidas</h3>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <button class="flex items-center justify-between p-6 bg-white border border-surface-container rounded-2xl hover:bg-surface-container-low transition-all ambient-shadow group text-left">
-                <div class="flex items-center gap-4">
-                    <div class="w-10 h-10 rounded-xl bg-primary/5 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all">
-                        <i class="fa-solid fa-file-signature text-lg"></i>
-                    </div>
-                    <span class="text-sm font-bold text-on-surface">Crear Consulta</span>
-                </div>
-                <i class="fa-solid fa-plus text-outline group-hover:text-primary transition-colors"></i>
-            </button>
-            <button class="flex items-center justify-between p-6 bg-white border border-surface-container rounded-2xl hover:bg-surface-container-low transition-all ambient-shadow group text-left" onclick="window.location.href='/calendario'">
-                <div class="flex items-center gap-4">
-                    <div class="w-10 h-10 rounded-xl bg-primary/5 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all">
-                        <i class="fa-solid fa-calendar-day text-lg"></i>
-                    </div>
-                    <span class="text-sm font-bold text-on-surface">Agendar cita</span>
-                </div>
-                <i class="fa-solid fa-plus text-outline group-hover:text-primary transition-colors"></i>
-            </button>
-            <button class="flex items-center justify-between p-6 bg-white border border-surface-container rounded-2xl hover:bg-surface-container-low transition-all ambient-shadow group text-left" onclick="window.location.href='{{ route('pacientes.index') }}'">
-                <div class="flex items-center gap-4">
-                    <div class="w-10 h-10 rounded-xl bg-primary/5 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all">
-                        <i class="fa-solid fa-user-plus text-lg"></i>
-                    </div>
-                    <span class="text-sm font-bold text-on-surface">Crear paciente</span>
-                </div>
-                <i class="fa-solid fa-plus text-outline group-hover:text-primary transition-colors"></i>
-            </button>
-        </div>
-    </div>
-
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <!-- Citas de Hoy -->
-        <div class="bg-white p-8 rounded-[2.5rem] border border-surface-container ambient-shadow">
-            <div class="flex items-center justify-between mb-8">
-                <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center text-primary">
-                        <i class="fa-solid fa-clock text-xl"></i>
-                    </div>
-                    <h3 class="text-xl font-black text-primary tracking-tighter">Citas de Hoy</h3>
-                </div>
-                <span class="px-4 py-1.5 bg-primary/5 text-primary text-[10px] font-black rounded-full uppercase tracking-widest">{{ now()->format('d M, Y') }}</span>
-            </div>
-            <div class="text-center py-10">
-                <div class="bg-surface-container-low w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i class="fa-solid fa-calendar-check text-outline opacity-40 text-2xl"></i>
-                </div>
-                <p class="text-sm text-on-surface-variant font-bold opacity-60 italic">No hay citas agendadas para hoy.</p>
-            </div>
-        </div>
-
-        <!-- Pacientes Recientes -->
-        <div class="bg-white rounded-[2.5rem] ambient-shadow border border-surface-container overflow-hidden">
-            <div class="p-8 pb-4 flex justify-between items-center">
-                <h3 class="text-xl font-black text-primary tracking-tighter">Pacientes Recientes</h3>
-                <a href="{{ route('pacientes.index') }}" class="text-xs font-bold text-primary hover:underline">Ver todos</a>
-            </div>
-
-            <div class="px-8 pb-8">
-                <div class="divide-y divide-surface-container-low">
-                    <div class="py-4 flex items-center justify-between group cursor-pointer">
-                        <div class="flex items-center gap-4">
-                            <div class="w-10 h-10 bg-secondary-container/40 rounded-xl flex items-center justify-center text-secondary font-black text-[10px]">EM</div>
-                            <div>
-                                <p class="text-sm font-black text-primary">Elena Martínez</p>
-                                <p class="text-[10px] text-outline font-bold uppercase tracking-widest">ID #6932-10</p>
-                            </div>
+        <h3 class="text-[10px] font-black text-outline uppercase tracking-[0.2em] mb-6 flex items-center gap-3">
+             <i class="fa-solid fa-star text-secondary"></i> Módulos Destacados
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            @foreach($favorites as $fav)
+                @if(isset($moduleMap[$fav]) && in_array($fav, $enabled))
+                <a href="{{ $moduleMap[$fav][3] }}" class="group bg-white p-8 rounded-[2.5rem] ambient-shadow border border-surface-container transition-all hover:-translate-y-2 hover:border-secondary/30 relative overflow-hidden">
+                    <div class="absolute -right-4 -top-4 w-24 h-24 bg-secondary/5 rounded-full group-hover:scale-150 transition-transform"></div>
+                    <div class="relative z-10 flex flex-col h-full">
+                        <div class="w-14 h-14 rounded-2xl bg-secondary/10 flex items-center justify-center text-secondary mb-6 group-hover:bg-secondary group-hover:text-white transition-all shadow-inner">
+                            <i class="fa-solid {{ $moduleMap[$fav][2] }} text-2xl"></i>
                         </div>
-                        <i class="fa-solid fa-chevron-right text-outline text-xs opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0"></i>
+                        <h4 class="text-xl font-black text-primary tracking-tighter mb-1">{{ $moduleMap[$fav][0] }}</h4>
+                        <p class="text-[10px] text-outline font-bold uppercase tracking-widest">{{ $moduleMap[$fav][1] }}</p>
                     </div>
-                    <div class="py-4 flex items-center justify-between group cursor-pointer">
-                        <div class="flex items-center gap-4">
-                            <div class="w-10 h-10 bg-primary/5 rounded-xl flex items-center justify-center text-primary font-black text-[10px]">JG</div>
-                            <div>
-                                <p class="text-sm font-black text-primary">Juan Guerrero</p>
-                                <p class="text-[10px] text-outline font-bold uppercase tracking-widest">ID #4421-08</p>
-                            </div>
-                        </div>
-                        <i class="fa-solid fa-chevron-right text-outline text-xs opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0"></i>
+                </a>
+                @endif
+            @endforeach
+        </div>
+    </div>
+    @endif
+
+    <!-- Dashboard Stats Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 fade-element">
+        <div class="bg-white p-7 rounded-[2.5rem] ambient-shadow border border-surface-container group hover:border-primary/20 transition-all">
+            <div class="flex justify-between items-center mb-6">
+                <div class="w-12 h-12 bg-primary/5 rounded-2xl flex items-center justify-center text-primary">
+                    <i class="fa-solid fa-users text-xl"></i>
+                </div>
+                <span class="text-[10px] font-black text-outline uppercase tracking-widest">Semana Actual</span>
+            </div>
+            <p class="text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-1">Crecimiento de Pacientes</p>
+            <div class="flex items-end justify-between">
+                <span class="text-4xl font-black text-primary tracking-tighter">0</span>
+                <span class="text-[10px] font-bold text-outline opacity-60">Nuevos registros</span>
+            </div>
+        </div>
+
+        <div class="bg-white p-7 rounded-[2.5rem] ambient-shadow border border-surface-container group hover:border-primary/20 transition-all">
+            <div class="flex justify-between items-center mb-6">
+                <div class="w-12 h-12 bg-primary/5 rounded-2xl flex items-center justify-center text-primary">
+                    <i class="fa-solid fa-calendar-check text-xl"></i>
+                </div>
+                <span class="text-[10px] font-black text-outline uppercase tracking-widest">Día de hoy</span>
+            </div>
+            <p class="text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-1">Citas Confirmadas</p>
+            <div class="flex items-end justify-between">
+                <span class="text-4xl font-black text-primary tracking-tighter">0</span>
+                <span class="text-[10px] font-bold text-outline opacity-60">Horarios ocupados</span>
+            </div>
+        </div>
+
+        <div class="bg-white p-7 rounded-[2.5rem] ambient-shadow border border-surface-container group hover:border-primary/20 transition-all">
+            <div class="flex justify-between items-center mb-6">
+                <div class="w-12 h-12 bg-primary/5 rounded-2xl flex items-center justify-center text-primary">
+                    <i class="fa-solid fa-laptop-medical text-xl"></i>
+                </div>
+                <span class="text-[10px] font-black text-outline uppercase tracking-widest">Global</span>
+            </div>
+            <p class="text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-1">Expedientes Totales</p>
+            <div class="flex items-end justify-between">
+                <span class="text-4xl font-black text-primary tracking-tighter">
+                    {{ \App\Models\Paciente::count() }}
+                </span>
+                <a href="{{ route('pacientes.index') }}" class="text-[10px] font-black text-primary hover:underline uppercase tracking-widest tracking-tighter">Administrar <i class="fa-solid fa-arrow-right ml-1"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 fade-element">
+        <!-- Próximas Citas (Placeholder) -->
+        <div class="bg-white p-10 rounded-[2.5rem] border border-surface-container ambient-shadow h-full">
+            <div class="flex items-center justify-between mb-10">
+                <div class="flex items-center gap-5">
+                    <div class="w-14 h-14 bg-primary/10 rounded-[1.5rem] flex items-center justify-center text-primary">
+                        <i class="fa-solid fa-hourglass-half text-2xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-black text-primary tracking-tighter">Próximas Citas</h3>
+                        <p class="text-[10px] text-outline font-black uppercase tracking-widest">Hoy & Mañana</p>
                     </div>
                 </div>
+            </div>
+            <div class="text-center py-12 bg-surface-container-low rounded-[2rem] border border-dashed border-surface-container-highest">
+                <p class="text-sm text-outline font-bold italic opacity-60">Sincroniza el calendario para ver tus citas aquí.</p>
+            </div>
+        </div>
+
+        <!-- Módulos Disponibles -->
+        <div class="bg-white p-10 rounded-[2.5rem] border border-surface-container ambient-shadow h-full">
+             <div class="flex items-center justify-between mb-10">
+                <div class="flex items-center gap-5">
+                    <div class="w-14 h-14 bg-secondary/10 rounded-[1.5rem] flex items-center justify-center text-secondary">
+                        <i class="fa-solid fa-compass text-2xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-black text-primary tracking-tighter">Navegación</h3>
+                        <p class="text-[10px] text-outline font-black uppercase tracking-widest">Ecosistema Activo</p>
+                    </div>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                @foreach($moduleMap as $key => $info)
+                    @if(in_array($key, $enabled))
+                    <a href="{{ $info[3] }}" class="p-5 bg-surface-container-low rounded-2xl flex items-center gap-4 hover:bg-white hover:shadow-md transition-all border border-transparent hover:border-surface-container">
+                        <i class="fa-solid {{ $info[2] }} text-primary text-lg"></i>
+                        <span class="text-xs font-black text-primary uppercase tracking-tighter">{{ $info[0] }}</span>
+                    </a>
+                    @endif
+                @endforeach
             </div>
         </div>
     </div>
@@ -157,8 +148,8 @@
 <style>
     .fade-element {
         opacity: 0;
-        transform: translateY(10px);
-        animation: fadeInUp 0.5s ease-out forwards;
+        transform: translateY(20px);
+        animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
     @keyframes fadeInUp {
         to { opacity: 1; transform: translateY(0); }
