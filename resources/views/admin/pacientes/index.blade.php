@@ -37,7 +37,7 @@
                 @foreach($pacientes as $paciente)
                 <tr class="hover:bg-surface-container-low/50 transition-colors group">
                     <td class="px-6 py-6">
-                        <span class="text-sm font-black text-primary">{{ $paciente->full_name }}</span>
+                        <span class="text-sm font-black text-primary">{{ $paciente->name }}</span>
                     </td>
                     <td class="px-6 py-6">
                         <span class="text-xs font-bold text-on-surface-variant">{{ $paciente->phone ?? 'S/N' }}</span>
@@ -204,5 +204,28 @@
         $(`#${id}`).addClass('hidden').removeClass('flex');
         $('body').removeClass('overflow-hidden');
     }
+
+    // Lógica para Reaccionar a la Creación Vía IA
+    $(document).ready(function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const newPatientId = urlParams.get('view_patient');
+        
+        if (newPatientId) {
+            // Simulamos abrir el registro recién creado
+            Swal.fire({
+                title: '¡Creación Inteligente Exitosa!',
+                text: 'El paciente fue registrado por Doc-IA. Ahora puedes verlo en el panel superior de tu directorio.',
+                icon: 'success',
+                confirmButtonText: 'Ver Directorio',
+                confirmButtonColor: '#00478d',
+                background: document.documentElement.classList.contains('dark') ? '#1a1c1e' : '#fff',
+                color: document.documentElement.classList.contains('dark') ? '#fff' : '#191c1e'
+            }).then(() => {
+                // Limpiar la URL sin recargar para que no vuelva a saltar si hacen F5
+                window.history.replaceState({}, document.title, window.location.pathname);
+                // Si tienes un modal de "Ver Detalles", aquí iría el código: openModal('viewPacienteModal')
+            });
+        }
+    });
 </script>
 @endsection

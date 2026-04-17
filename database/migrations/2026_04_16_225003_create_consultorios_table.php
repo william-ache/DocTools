@@ -12,22 +12,19 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('consultorios', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
+            $table->foreignUuid('tenant_id')->constrained()->onDelete('cascade');
             $table->string('name');
             $table->string('address')->nullable();
             $table->string('phone')->nullable();
             $table->text('indications')->nullable();
-            $table->decimal('lat', 10, 8)->nullable();
-            $table->decimal('lng', 11, 8)->nullable();
             
-            // Appointment Configuration
+            // Config de citas
             $table->integer('rest_time_between_appointments')->default(15);
             $table->integer('max_days_anticipation')->default(30);
             $table->integer('standard_appointment_duration')->default(30);
             $table->string('timezone')->default('America/Caracas');
-            
-            $table->boolean('is_online_booking_enabled')->default(true);
-            $table->boolean('whatsapp_reminders')->default(true);
+            $table->boolean('whatsapp_reminders')->default(false);
             $table->boolean('accept_bookings')->default(true);
             $table->boolean('booking_notifications')->default(true);
             

@@ -1,0 +1,19 @@
+ahorrar consultas con ia
+
+tener reporte en general
+
+especializar modulos dependiendo de la especializacion del profesional
+
+que poueda enviiar informes y otras cosas atrasvez de whatsapp del paciente
+
+dictado por voz, para historia clinica, informe constancias, documentos, recipe y paraclinico 
+
+que puedan modificar varias plantillas tipo bloger y que la ia reconosca la voz y autocomplete los datos, cuando le de a crear documento sea un select multiple donde selecione que tipo de documento es que se pueda imprimir, mandar por whatsapp o correo y descargar pdf 
+
+que se pueda registrar por google y autocomplete nombre apellido y que ponga numero para mandar codigo de verificacion por whatsapp
+
+que al estar en el sistema el microfono siempre este activado para el asistente de virtual
+
+https://www.instagram.com/docguia.inc/
+
+https://www.docguia.com/

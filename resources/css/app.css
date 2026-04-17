@@ -1,11 +1,28 @@
-@import 'tailwindcss';
-
-@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-@source '../../storage/framework/views/*.php';
-@source '../**/*.blade.php';
-@source '../**/*.js';
+@import "tailwindcss";
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+  --color-primary: var(--tenant-primary, #00478d);
+  --color-primary-container: var(--tenant-primary-container, #005eb8);
+  --color-secondary: #006687;
+  --color-secondary-container: #80d3fd;
+  --color-tertiary: #516266;
+  --color-tertiary-container: #d4e6eb;
+  --color-surface: #f7f9fb;
+  --color-on-surface: #191c1e;
+  --color-on-surface-variant: #424752;
+  --color-surface-container-low: #f2f4f6;
+  --color-surface-container-high: #e6e8ea;
+  --color-surface-container-highest: #e0e3e5;
+  --color-surface-container-lowest: #ffffff;
+  --color-outline: #8e9199;
+  --color-outline-variant: rgba(194, 198, 212, 0.15);
+  --color-error: #ba1a1a;
+  --color-error-container: #ffdad6;
+
+  --font-manrope: "Manrope", sans-serif;
+
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-4xl: 2rem;
+  --radius-5xl: 3.5rem;
 }

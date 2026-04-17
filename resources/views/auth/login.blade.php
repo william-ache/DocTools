@@ -28,13 +28,13 @@
                     <label class="block text-[10px] font-black text-on-surface mb-3 tracking-widest uppercase ml-1">Correo Electrónico</label>
                     <input name="email" type="email" autocomplete="email" required 
                         class="block w-full px-6 py-4 rounded-2xl bg-surface-container-low border-none focus:ring-4 focus:ring-primary/10 transition-all font-bold placeholder:text-outline/50" 
-                        placeholder="admin@doctools.com" value="{{ old('email') }}">
+                        placeholder="admin@doctools.com" value="{{ old('email', 'admin@doctools.com') }}">
                 </div>
                 <div>
                     <label class="block text-[10px] font-black text-on-surface mb-3 tracking-widest uppercase ml-1">Contraseña</label>
                     <input name="password" type="password" autocomplete="current-password" required 
                         class="block w-full px-6 py-4 rounded-2xl bg-surface-container-low border-none focus:ring-4 focus:ring-primary/10 transition-all font-bold placeholder:text-outline/50" 
-                        placeholder="••••••••">
+                        placeholder="••••••••" value="ServBay.dev">
                 </div>
             </div>
 

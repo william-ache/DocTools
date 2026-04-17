@@ -11,15 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('metodos_pago', function (Blueprint $table) {
+        Schema::create('consultations', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('tenant_id')->constrained()->onDelete('cascade');
-            $table->string('name');
-            $table->string('type')->default('Digital'); // Digital, Cash, Crypto
-            $table->string('color')->nullable();
-            $table->string('icon')->nullable();
-            $table->text('details')->nullable();
-            $table->boolean('is_active')->default(true);
+            $table->foreignUuid('patient_id')->constrained()->onDelete('cascade');
+            $table->text('diagnosis')->nullable();
+            $table->text('treatment')->nullable();
+            $table->text('notes')->nullable();
             $table->timestamps();
         });
     }
@@ -29,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('metodos_pago');
+        Schema::dropIfExists('consultations');
     }
 };

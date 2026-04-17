@@ -92,7 +92,7 @@
             <p class="text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-1">Expedientes Totales</p>
             <div class="flex items-end justify-between">
                 <span class="text-4xl font-black text-primary tracking-tighter">
-                    {{ \App\Models\Paciente::count() }}
+                    {{ \App\Models\Patient::count() }}
                 </span>
                 <a href="{{ route('pacientes.index') }}" class="text-[10px] font-black text-primary hover:underline uppercase tracking-widest tracking-tighter">Administrar <i class="fa-solid fa-arrow-right ml-1"></i></a>
             </div>

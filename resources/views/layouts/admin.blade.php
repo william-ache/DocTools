@@ -5,17 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel Administrativo - Dr. Javier González Pugh</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet"/>
-    <!-- Font Awesome 6 -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    
-    <script src="{{ asset('js/tailwindcss.js') }}"></script>
-    <link rel="stylesheet" href="{{ asset('css/design-tokens.css') }}">
-    
-    <!-- SweetAlert2 -->
-    <link rel="stylesheet" href="{{ asset('assets/libs/sweetalert2/style.css') }}">
-    <script src="{{ asset('assets/libs/sweetalert2/script.js') }}"></script>
-
     @php
         $appSettings = \App\Models\Setting::first() ?? (object)[
             'app_name' => 'Consultia', 
@@ -24,7 +13,26 @@
         ];
         $enabledMods = $appSettings->enabled_modules ?? [];
     @endphp
+    
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
+    @viteReactRefresh
+    @vite(['resources/js/app.jsx'])
 
+    <script src="{{ asset('js/tailwindcss.js') }}"></script>
+    <link rel="stylesheet" href="{{ asset('css/design-tokens.css') }}">
+    
+    <!-- PWA Support -->
+    <link rel="manifest" href="{{ asset('manifest.json') }}">
+    <meta name="theme-color" content="{{ $appSettings->primary_color }}">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <!-- SweetAlert2 -->
+    <link rel="stylesheet" href="{{ asset('assets/libs/sweetalert2/style.css') }}">
+    <script src="{{ asset('assets/libs/sweetalert2/script.js') }}"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -58,8 +66,13 @@
             }
         }
     </script>
+
     
     <script src="{{ asset('js/jquery.min.js') }}"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.dataTables.min.css">
 
     <style>
         /* Dark Mode Definitions */
@@ -106,6 +119,10 @@
         .fab-options { display: none; flex-direction: column; align-items: flex-end; gap: 10px; opacity: 0; transform: translateY(20px); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .fab-options.show { display: flex; opacity: 1; transform: translateY(0); }
         .fab-main-btn.active { transform: rotate(45deg); }
+
+        /* Ajustes de posición para FAB y Mic */
+        .fab-position { bottom: 100px; right: 30px; }
+        .mic-position { bottom: 30px; right: 34px; }
     </style>
 
     <script>
@@ -215,8 +232,11 @@
         </div>
     </div>
 
+    <!-- DocIA Assistant Mount Point (Smaller & Under FAB) -->
+    <div id="doc-ia-global-mic" class="fixed mic-position z-[60]"></div>
+
     <!-- FAB Button -->
-    <div class="fab-container">
+    <div class="fab-container fab-position">
         <div class="fab-options" id="fab-options">
             <a href="#" class="flex items-center gap-3 px-5 py-3 bg-white text-primary rounded-2xl shadow-xl border border-surface-container hover:bg-primary hover:text-white transition-all">
                 <span class="text-xs font-bold">Nueva Cita</span>
@@ -275,6 +295,24 @@
             const toastConfig = { toast: true, position: 'top-end', showConfirmButton: false, timer: 3500, timerProgressBar: true };
             @if (Session::has('success')) Swal.fire({ ...toastConfig, icon: 'success', title: "{{ Session::get('success') }}" }); @endif
             @if (Session::has('error')) Swal.fire({ ...toastConfig, icon: 'error', title: "{{ Session::get('error') }}" }); @endif
+
+            // Registro de PWA Service Worker
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('/sw.js').then((registration) => {
+                        console.log('Consultia PWA ServiceWorker registrado con éxito.');
+                        
+                        // Enviar señal Keep-Alive cada 4 minutos para evitar el throttling agresivo
+                        setInterval(() => {
+                            if (registration.active) {
+                                registration.active.postMessage({ type: 'KEEP_ALIVE' });
+                            }
+                        }, 240000);
+                    }).catch((error) => {
+                        console.error('Error al registrar ServiceWorker:', error);
+                    });
+                });
+            }
         });
     </script>
 </body>

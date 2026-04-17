@@ -4,8 +4,9 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\ConsultorioController;
 use App\Http\Controllers\Admin\ServicioController;
 use App\Http\Controllers\Admin\MetodoPagoController;
-use App\Http\Controllers\Admin\PacienteController;
+use App\Http\Controllers\Admin\PatientController;
 use App\Http\Controllers\Admin\SettingController;
+use App\Http\Controllers\Api\DocIaController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -57,7 +58,7 @@ Route::middleware(['auth'])->group(function () {
     ]);
     Route::post('admin/finanzas/{finanza}/toggle-status', [MetodoPagoController::class, 'toggleStatus'])->name('metodos.toggle-status');
 
-    Route::resource('admin/pacientes', PacienteController::class)->names([
+    Route::resource('admin/pacientes', PatientController::class)->names([
         'index' => 'pacientes.index',
         'create' => 'pacientes.create',
         'store' => 'pacientes.store',
@@ -70,4 +71,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('admin/configuracion', [SettingController::class, 'index'])->name('settings.index');
     Route::put('admin/configuracion', [SettingController::class, 'update'])->name('settings.update');
     Route::put('admin/configuracion/perfil', [SettingController::class, 'updateProfile'])->name('settings.updateProfile');
+
+    // DocIA Routes
+    Route::post('api/doc-ia/voice', [DocIaController::class, 'processVoice']);
 });

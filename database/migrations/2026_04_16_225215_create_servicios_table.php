@@ -12,15 +12,16 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('servicios', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
+            $table->foreignUuid('tenant_id')->constrained()->onDelete('cascade');
             $table->string('name');
-            $table->string('description', 500)->nullable();
-            $table->decimal('price', 10, 2)->default(0);
+            $table->text('description')->nullable();
+            $table->decimal('price', 10, 2);
             $table->boolean('price_from')->default(false);
-            $table->integer('duration')->default(30);
-            $table->boolean('is_active')->default(true);
-            $table->string('icon')->nullable();
+            $table->integer('duration')->default(30); // minutes
             $table->string('color')->nullable();
+            $table->string('icon')->nullable();
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
     }

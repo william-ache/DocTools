@@ -6,34 +6,27 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-class MetodoPago extends Model
+class DocIaInteraction extends Model
 {
     use HasFactory, HasUuids;
 
-    protected $table = 'metodos_pago';
-
     protected $fillable = [
         'tenant_id',
-        'name',
         'type',
-        'color',
-        'icon',
-        'details',
-        'is_active',
+        'payload',
+        'response',
+    ];
+
+    protected $casts = [
+        'payload' => 'array',
     ];
 
     /**
-     * Get the tenant that owns the payment method.
+     * Get the tenant that owns the interaction log.
      */
     public function tenant(): BelongsTo
     {
         return $this->belongsTo(Tenant::class);
-    }
-
-    public function consultorios(): BelongsToMany
-    {
-        return $this->belongsToMany(Consultorio::class, 'consultorio_metodo_pago');
     }
 }

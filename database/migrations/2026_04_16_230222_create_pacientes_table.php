@@ -11,17 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('pacientes', function (Blueprint $table) {
-            $table->id();
+        Schema::create('patients', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->foreignUuid('tenant_id')->constrained()->onDelete('cascade');
             $table->string('name');
-            $table->string('last_name');
-            $table->string('email')->nullable();
-            $table->string('phone')->nullable();
-            $table->string('id_number')->nullable(); // Cédula o DNI
+            $table->string('id_number')->nullable();
             $table->date('birth_date')->nullable();
-            $table->string('gender')->nullable(); // M, F, Otro
+            $table->string('gender')->nullable();
+            $table->json('allergies')->nullable();
+            $table->text('antecedentes')->nullable();
+            $table->string('phone')->nullable();
+            $table->string('email')->nullable();
             $table->text('address')->nullable();
-            $table->text('medical_notes')->nullable(); // Nota rápida sobre el paciente
             $table->timestamps();
         });
     }
@@ -31,6 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('pacientes');
+        Schema::dropIfExists('patients');
     }
 };

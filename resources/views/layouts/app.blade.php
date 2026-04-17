@@ -50,6 +50,8 @@
         }
     </script>
     
+    @vite(['resources/js/app.jsx'])
+    
     <!-- jQuery -->
     <script src="{{ asset('js/jquery.min.js') }}"></script>
     

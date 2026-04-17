@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\MetodoPago;
 use App\Models\Servicio;
 use App\Models\Setting;
+use App\Models\Tenant;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -16,27 +17,38 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Usuario Administrador Base
+        // 1. Crear el Tenant Base (SaaS)
+        $tenant = Tenant::updateOrCreate(
+            ['name' => 'Santuario Clínico Base'],
+            [
+                'domain' => 'santuario.test',
+                'plan' => 'enterprise',
+                'is_active' => true,
+            ]
+        );
+
+        // 2. Usuario Administrador Base vinculado al Tenant
         User::updateOrCreate(
             ['email' => 'admin@doctools.com'],
             [
+                'tenant_id' => $tenant->id,
                 'name' => 'Dr. Javier Admin',
                 'specialty' => 'Otorrinolaringólogo',
                 'password' => Hash::make('ServBay.dev'),
             ]
         );
 
-        // Configuraciones Base
+        // 3. Configuraciones Base
         Setting::updateOrCreate(
             ['id' => 1],
             [
-                'app_name' => 'Santuario Clínico',
+                'app_name' => 'Consultia',
                 'primary_color' => '#00478d',
                 'enabled_modules' => ['consultorios', 'servicios', 'finanzas', 'pacientes'],
             ]
         );
 
-        // Métodos de Pago Premium
+        // 4. Métodos de Pago Premium vinculados al Tenant
         $metodos = [
             ['name' => 'Zelle', 'type' => 'Digital', 'icon' => 'fa-wallet', 'color' => '#632C94', 'details' => 'correo@ejemplo.com'],
             ['name' => 'Binance Pay', 'type' => 'Crypto', 'icon' => 'fa-bitcoin-sign', 'color' => '#F3BA2F', 'details' => 'ID: 12345678'],
@@ -46,10 +58,11 @@ class DatabaseSeeder extends Seeder
         ];
 
         foreach ($metodos as $m) {
-            MetodoPago::updateOrCreate(['name' => $m['name']], $m);
+            $m['tenant_id'] = $tenant->id;
+            MetodoPago::updateOrCreate(['name' => $m['name'], 'tenant_id' => $tenant->id], $m);
         }
 
-        // Servicios Premium con Identidad Visual
+        // 5. Servicios Premium vinculados al Tenant
         $servicios = [
             [
                 'name' => 'Primera consulta', 
@@ -78,37 +91,11 @@ class DatabaseSeeder extends Seeder
                 'color' => '#6200EE',
                 'description' => 'Atención médica remota mediante videollamada segura.'
             ],
-            [
-                'name' => 'Limpieza de oídos (Lavado)', 
-                'duration' => 20, 
-                'price' => 40, 
-                'is_active' => true, 
-                'icon' => 'fa-vial', 
-                'color' => '#D32F2F',
-                'description' => 'Procedimiento de extracción de cerumen mediante irrigación controlada.'
-            ],
-            [
-                'name' => 'Evaluación preoperatoria', 
-                'duration' => 60, 
-                'price' => 80, 
-                'is_active' => true, 
-                'icon' => 'fa-briefcase-medical', 
-                'color' => '#FF5722',
-                'description' => 'Valoración completa previa a intervenciones quirúrgicas.'
-            ],
-            [
-                'name' => 'Informe médico detallado', 
-                'duration' => 20, 
-                'price' => 15, 
-                'is_active' => true, 
-                'icon' => 'fa-microscope', 
-                'color' => '#3F51B5',
-                'description' => 'Redacción de documentos legales y clínicos para seguros o trámites.'
-            ],
         ];
 
         foreach ($servicios as $s) {
-            Servicio::updateOrCreate(['name' => $s['name']], $s);
+            $s['tenant_id'] = $tenant->id;
+            Servicio::updateOrCreate(['name' => $s['name'], 'tenant_id' => $tenant->id], $s);
         }
     }
 }

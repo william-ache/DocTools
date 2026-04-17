@@ -11,15 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('metodos_pago', function (Blueprint $table) {
+        Schema::create('doc_ia_interactions', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('tenant_id')->constrained()->onDelete('cascade');
-            $table->string('name');
-            $table->string('type')->default('Digital'); // Digital, Cash, Crypto
-            $table->string('color')->nullable();
-            $table->string('icon')->nullable();
-            $table->text('details')->nullable();
-            $table->boolean('is_active')->default(true);
+            $table->string('type')->nullable(); // transcription, diagnosis_help, etc.
+            $table->json('payload')->nullable(); // interaction data
+            $table->text('response')->nullable(); // IA response
             $table->timestamps();
         });
     }
@@ -29,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('metodos_pago');
+        Schema::dropIfExists('doc_ia_interactions');
     }
 };

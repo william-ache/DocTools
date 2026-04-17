@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('consultorio_metodo_pago', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('consultorio_id')->constrained()->onDelete('cascade');
-            $table->foreignId('metodo_pago_id')->constrained('metodos_pago')->onDelete('cascade');
+            $table->foreignUuid('consultorio_id')->constrained('consultorios')->onDelete('cascade');
+            $table->foreignUuid('metodo_pago_id')->constrained('metodos_pago')->onDelete('cascade');
             $table->timestamps();
         });
     }
