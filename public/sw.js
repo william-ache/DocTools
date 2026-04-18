@@ -1,4 +1,4 @@
-const CACHE_NAME = 'consultia-v1';
+const CACHE_NAME = 'consultia-v2';
 const ASSETS_TO_CACHE = [
     '/admin/dashboard',
     '/css/design-tokens.css',
@@ -35,15 +35,19 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-    // Solo cachear peticiones GET
     if (event.request.method !== 'GET') return;
 
+    // Estrategia Network-First con Fallback al Cache (Ideal para SaaS Dinámicos)
     event.respondWith(
-        caches.match(event.request).then((cachedResponse) => {
-            return cachedResponse || fetch(event.request).catch(() => {
-                // Fallback offline si es necesario
-            });
-        })
+        fetch(event.request)
+            .then((networkResponse) => {
+                // Opcional: Actualizar el cache con la nueva respuesta si es un asset estático
+                return networkResponse;
+            })
+            .catch(() => {
+                // Si falla la red (Modo Offline), intentar devolver del Cache
+                return caches.match(event.request);
+            })
     );
 });
 

@@ -14,7 +14,7 @@ class SettingController extends Controller
     {
         $settings = Setting::first() ?? Setting::create([
             'app_name' => 'Consultia',
-            'primary_color' => '#00478d',
+            'primary_color' => '#6D4AFF',
             'enabled_modules' => ['consultorios', 'servicios', 'finanzas', 'pacientes'],
             'favorite_modules' => [],
         ]);
@@ -63,5 +63,30 @@ class SettingController extends Controller
         $user->save();
 
         return back()->with('success', 'Perfil actualizado correctamente.');
+    }
+
+    public function updatePhoto(Request $request)
+    {
+        $request->validate([
+            'photo' => 'required|string',
+        ]);
+
+        Auth::user()->update([
+            'profile_photo' => $request->photo
+        ]);
+
+        return response()->json(['success' => true]);
+    }
+
+    public function reset(Request $request)
+    {
+        $settings = Setting::first();
+        $settings->update([
+            'primary_color' => '#6D4AFF',
+            'enabled_modules' => ['consultorios', 'servicios', 'finanzas', 'pacientes'],
+            'favorite_modules' => [],
+        ]);
+
+        return back()->with('success', 'Configuraciones restauradas a los valores predeterminados de fábrica.');
     }
 }

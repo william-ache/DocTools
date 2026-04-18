@@ -66,7 +66,7 @@
         </div>
 
         <div class="flex flex-col sm:flex-row gap-6 pt-6 tracking-wide">
-            <a href="{{ route('metodos.index') }}" class="flex-1 text-center py-5 border-2 border-surface-container rounded-2xl font-black text-outline hover:bg-surface-container-low transition-all uppercase text-xs">
+            <a href="{{ route('finanzas.index') }}" class="flex-1 text-center py-5 border-2 border-surface-container rounded-2xl font-black text-outline hover:bg-surface-container-low transition-all uppercase text-xs">
                 Cancelar
             </a>
             <button type="submit" class="flex-[2] hero-gradient text-white py-5 rounded-2xl font-black text-lg shadow-xl hover:scale-[1.02] transition-all flex items-center justify-center gap-3">

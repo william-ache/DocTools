@@ -14,72 +14,70 @@
     </div>
 
     <!-- Lista de Consultorios -->
-    <div class="space-y-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4">
         @forelse($consultorios as $consultorio)
-        <div class="bg-white p-8 rounded-[2.5rem] ambient-shadow border border-surface-container relative overflow-hidden group">
-            <div class="flex flex-col lg:flex-row justify-between gap-8 h-full">
-                <!-- Info del Consultorio -->
-                <div class="flex-1 space-y-4">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 bg-primary/5 rounded-2xl flex items-center justify-center text-primary">
-                            <i class="fa-solid fa-building-user text-xl"></i>
+        <div class="bg-white p-4 rounded-[1.5rem] ambient-shadow border border-surface-container relative group hover:border-primary/20 transition-all">
+            <div class="flex flex-col space-y-3">
+                <!-- Header: Icono + Título + Editar -->
+                <div class="flex justify-between items-start gap-2">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <div class="w-10 h-10 bg-primary/5 rounded-xl flex-shrink-0 flex items-center justify-center text-primary border border-primary/5">
+                            <i class="fa-solid fa-building-user text-base"></i>
                         </div>
-                        <h3 class="text-2xl font-black text-primary tracking-tight">{{ $consultorio->name }}</h3>
-                    </div>
-                    
-                    <div class="space-y-2 ml-1">
-                        <div class="flex items-center gap-3 text-on-surface-variant">
-                            <i class="fa-solid fa-location-dot text-sm text-outline w-4"></i>
-                            <p class="text-sm font-medium">{{ $consultorio->address ?? 'Dirección no especificada' }}</p>
-                        </div>
-                        <div class="flex items-center gap-3 text-on-surface-variant">
-                            <i class="fa-solid fa-phone text-sm text-outline w-4"></i>
-                            <p class="text-sm font-medium">{{ $consultorio->phone ?? 'Sin teléfono registrado' }}</p>
+                        <div class="min-w-0">
+                            <h3 class="text-base font-black text-primary tracking-tight truncate leading-tight">{{ $consultorio->name }}</h3>
+                            <div class="flex items-center gap-1.5 mt-0.5">
+                                <span class="w-1.5 h-1.5 rounded-full {{ $consultorio->accept_bookings ? 'bg-green-600' : 'bg-outline' }}"></span>
+                                <span class="text-[8px] font-black uppercase tracking-wider {{ $consultorio->accept_bookings ? 'text-green-600' : 'text-outline' }}">
+                                    {{ $consultorio->accept_bookings ? 'Activo' : 'Inactivo' }}
+                                </span>
+                            </div>
                         </div>
                     </div>
+                    <a href="{{ route('consultorios.edit', $consultorio) }}" class="p-2 rounded-lg bg-surface-container-low text-primary hover:bg-primary hover:text-white transition-all border border-surface-container">
+                        <i class="fa-solid fa-pen-to-square text-[10px]"></i>
+                    </a>
+                </div>
 
-                    <!-- Stats Mock -->
-                    <div class="flex gap-8 pt-4 border-t border-surface-container-low">
-                        <div>
-                            <p class="text-[10px] font-black text-outline uppercase tracking-widest mb-1">Total citas</p>
-                            <p class="text-lg font-black text-primary">0</p>
-                        </div>
-                        <div>
-                            <p class="text-[10px] font-black text-outline uppercase tracking-widest mb-1">Este mes</p>
-                            <p class="text-lg font-black text-primary">0</p>
-                        </div>
-                        <div>
-                            <p class="text-[10px] font-black text-outline uppercase tracking-widest mb-1">Estatus</p>
-                            <p class="text-lg font-black text-green-600">Activo</p>
-                        </div>
+                <!-- Info: Dirección y Telf (Compacta) -->
+                <div class="space-y-1.5 px-0.5">
+                    <div class="flex items-center gap-2 text-on-surface-variant">
+                        <i class="fa-solid fa-location-dot text-[9px] text-outline w-3"></i>
+                        <p class="text-[10px] font-bold truncate">{{ $consultorio->address ?? 'Sin dirección' }}</p>
+                    </div>
+                    <div class="flex items-center gap-2 text-on-surface-variant">
+                        <i class="fa-solid fa-phone text-[9px] text-outline w-3"></i>
+                        <p class="text-[10px] font-bold">{{ $consultorio->phone ?? 'Sin teléfono' }}</p>
                     </div>
                 </div>
 
-                <!-- Acciones -->
-                <div class="flex flex-col justify-between items-end gap-6 text-right lg:min-w-[280px]">
-                    <div class="flex gap-3">
-                        <a href="{{ route('consultorios.edit', $consultorio) }}" class="flex items-center gap-2 px-5 py-3 rounded-xl bg-surface-container-low text-xs font-black text-primary hover:bg-surface-container-high transition-all border border-surface-container uppercase tracking-widest">
-                            <i class="fa-solid fa-pen-to-square"></i> Editar
-                        </a>
-                        <button class="flex items-center gap-2 px-5 py-3 rounded-xl bg-surface-container-low text-xs font-black text-primary hover:bg-surface-container-high transition-all border border-surface-container uppercase tracking-widest">
-                            <i class="fa-solid fa-calendar-days"></i> Agenda
-                        </button>
+                <!-- Stats: Horizontal Row -->
+                <div class="flex items-center justify-between py-2 border-y border-surface-container-low">
+                    <div class="flex gap-4">
+                        <div class="flex flex-col">
+                            <span class="text-[7px] font-black text-outline uppercase">Citas</span>
+                            <span class="text-sm font-black text-primary leading-none">0</span>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-[7px] font-black text-outline uppercase">Mes</span>
+                            <span class="text-sm font-black text-primary leading-none">0</span>
+                        </div>
                     </div>
-
-                    <div class="flex items-center gap-4">
-                        <span class="text-[10px] font-black uppercase tracking-widest {{ $consultorio->accept_bookings ? 'text-green-600' : 'text-outline' }} flex items-center gap-2">
-                            <span class="w-2 h-2 rounded-full {{ $consultorio->accept_bookings ? 'bg-green-600' : 'bg-outline' }}"></span>
-                            Reserva Online
-                        </span>
-                        
+                    <div class="flex items-center gap-2">
+                        <span class="text-[7px] font-black uppercase tracking-widest text-outline">Reserva</span>
                         <form action="{{ route('consultorios.toggle-booking', $consultorio) }}" method="POST">
                             @csrf
-                            <button type="submit" class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none {{ $consultorio->accept_bookings ? 'bg-primary' : 'bg-surface-container-highest' }}">
-                                <span aria-hidden="true" class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out {{ $consultorio->accept_bookings ? 'translate-x-5' : 'translate-x-0' }}"></span>
+                            <button type="submit" class="relative inline-flex h-4 w-8 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none {{ $consultorio->accept_bookings ? 'bg-primary' : 'bg-surface-container-highest' }}">
+                                <span aria-hidden="true" class="pointer-events-none inline-block h-3 w-3 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out {{ $consultorio->accept_bookings ? 'translate-x-4' : 'translate-x-0' }}"></span>
                             </button>
                         </form>
                     </div>
                 </div>
+
+                <!-- Botón Principal -->
+                <button class="w-full py-2 rounded-lg bg-primary text-[9px] font-black text-white hover:bg-primary-container transition-all shadow-sm uppercase tracking-widest flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-calendar-days text-[10px]"></i> Agenda
+                </button>
             </div>
         </div>
         @empty

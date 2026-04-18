@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('specialty')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->longText('profile_photo')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

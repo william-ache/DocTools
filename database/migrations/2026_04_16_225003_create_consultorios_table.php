@@ -16,6 +16,8 @@ return new class extends Migration
             $table->foreignUuid('tenant_id')->constrained()->onDelete('cascade');
             $table->string('name');
             $table->string('address')->nullable();
+            $table->decimal('latitude', 10, 8)->nullable();
+            $table->decimal('longitude', 11, 8)->nullable();
             $table->string('phone')->nullable();
             $table->text('indications')->nullable();
             
@@ -23,6 +25,7 @@ return new class extends Migration
             $table->integer('rest_time_between_appointments')->default(15);
             $table->integer('max_days_anticipation')->default(30);
             $table->integer('standard_appointment_duration')->default(30);
+            $table->integer('calendar_interval')->default(30);
             $table->string('timezone')->default('America/Caracas');
             $table->boolean('whatsapp_reminders')->default(false);
             $table->boolean('accept_bookings')->default(true);

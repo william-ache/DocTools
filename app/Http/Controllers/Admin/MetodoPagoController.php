@@ -31,7 +31,7 @@ class MetodoPagoController extends Controller
 
         MetodoPago::create($validated);
 
-        return redirect()->route('metodos.index')->with('success', 'Método de pago registrado.');
+        return redirect()->route('finanzas.index')->with('success', 'Método de pago registrado.');
     }
 
     public function edit(MetodoPago $finanza)
@@ -53,13 +53,13 @@ class MetodoPagoController extends Controller
 
         $finanza->update($validated);
 
-        return redirect()->route('metodos.index')->with('success', 'Método de pago actualizado.');
+        return redirect()->route('finanzas.index')->with('success', 'Método de pago actualizado.');
     }
 
     public function destroy(MetodoPago $finanza)
     {
         $finanza->delete();
-        return redirect()->route('metodos.index')->with('success', 'Método de pago eliminado.');
+        return redirect()->route('finanzas.index')->with('success', 'Método de pago eliminado.');
     }
 
     public function toggleStatus(MetodoPago $finanza)

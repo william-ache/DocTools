@@ -38,8 +38,15 @@
                     @method('PUT')
                     
                     <div class="flex items-center gap-6 mb-4">
-                        <div class="w-20 h-20 rounded-3xl bg-primary/10 flex items-center justify-center text-primary relative group">
-                            <i class="fa-solid fa-user-md text-3xl"></i>
+                        <div class="w-20 h-20 rounded-3xl bg-primary/10 flex items-center justify-center text-primary relative group cursor-pointer overflow-hidden border-2 border-transparent hover:border-primary/30 transition-all" onclick="document.getElementById('profile-upload').click()">
+                            @if($user->profile_photo)
+                                <img id="section-profile-img" src="{{ $user->profile_photo }}" class="w-full h-full object-cover">
+                            @else
+                                <i class="fa-solid fa-user-md text-3xl"></i>
+                            @endif
+                            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                                <i class="fa-solid fa-camera text-white text-xl"></i>
+                            </div>
                         </div>
                         <div>
                             <h3 class="text-xl font-black text-primary">Información Profesional</h3>
@@ -99,9 +106,18 @@
                         </div>
                     </div>
 
-                    <div class="pt-6">
+                    <div class="pt-6 flex flex-col gap-4">
                         <button type="submit" class="w-full hero-gradient text-white py-5 rounded-2xl font-black text-lg shadow-xl hover:scale-[1.01] transition-all">Guardar Identidad Visual</button>
+                        
+                        <button type="button" onclick="confirmReset()" class="w-full border-2 border-surface-container text-outline py-4 rounded-2xl font-bold text-sm hover:bg-surface-container-low transition-all flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-rotate-left"></i>
+                            Restaurar valores de fábrica
+                        </button>
                     </div>
+                </form>
+
+                <form id="reset-form" action="{{ route('settings.reset') }}" method="POST" class="hidden">
+                    @csrf
                 </form>
             </div>
 
@@ -212,9 +228,10 @@
 
 <style>
     .active-tab {
-        border-color: #00478d !important;
+        border-color: #6D4AFF !important;
         background-color: #f7f9fb !important;
-        box-shadow: 0 10px 40px -10px rgba(0,71,141,0.15) !important;
+        box-shadow: 0 10px 40px -10px rgba(109,74,255,0.15) !important;
+    }
     }
 </style>
 
@@ -232,5 +249,28 @@
         const hash = window.location.hash.replace('#', '');
         if (hash) showSection(hash);
     });
+
+    function confirmReset() {
+        Swal.fire({
+            title: '¿Restaurar valores?',
+            text: "Se restablecerá el color Proton y todos los módulos por defecto.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#6D4AFF',
+            cancelButtonColor: '#f44336',
+            confirmButtonText: 'Sí, restaurar',
+            cancelButtonText: 'Cancelar',
+            background: '#ffffff',
+            customClass: {
+                popup: 'rounded-[2rem]',
+                confirmButton: 'rounded-xl font-bold px-6 py-3',
+                cancelButton: 'rounded-xl font-bold px-6 py-3'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('reset-form').submit();
+            }
+        })
+    }
 </script>
 @endsection

@@ -34,27 +34,6 @@
                 </tr>
             </thead>
             <tbody class="divide-y divide-surface-container-low">
-                @foreach($pacientes as $paciente)
-                <tr class="hover:bg-surface-container-low/50 transition-colors group">
-                    <td class="px-6 py-6">
-                        <span class="text-sm font-black text-primary">{{ $paciente->name }}</span>
-                    </td>
-                    <td class="px-6 py-6">
-                        <span class="text-xs font-bold text-on-surface-variant">{{ $paciente->phone ?? 'S/N' }}</span>
-                    </td>
-                    <td class="px-6 py-6">
-                        <span class="text-xs font-bold text-on-surface-variant">{{ $paciente->id_number ?? 'No definido' }}</span>
-                    </td>
-                    <td class="px-6 py-6">
-                        <span class="text-xs font-bold text-on-surface-variant">{{ $paciente->email ?? 'No definido' }}</span>
-                    </td>
-                    <td class="px-6 py-6 text-right">
-                        <a href="{{ route('pacientes.edit', $paciente) }}" class="inline-flex items-center gap-2 text-primary font-bold text-xs hover:underline">
-                            <i class="fa-solid fa-eye text-sm"></i> Ver
-                        </a>
-                    </td>
-                </tr>
-                @endforeach
             </tbody>
         </table>
     </div>
@@ -112,7 +91,7 @@
             <div class="grid grid-cols-2 gap-4">
                 <div class="space-y-2">
                     <label class="block text-[10px] font-black text-outline uppercase tracking-widest">Sexo (opcional)</label>
-                    <select name="gender" class="w-full px-5 py-4 bg-surface-container-low rounded-xl border-none font-bold appearance-none">
+                    <select name="gender" class="w-full px-5 py-4 bg-surface-container-low rounded-xl border-none font-bold appearance-none select2-basic">
                         <option value="">Seleccionar...</option>
                         <option value="Femenino">Femenino</option>
                         <option value="Masculino">Masculino</option>
@@ -181,13 +160,31 @@
 
 <script>
     $(document).ready(function() {
+        // Inicializar Select2 Globalmente
+        $('.select2-basic').select2({
+            dropdownParent: $('#addPacienteModal')
+        });
+
         const table = $('#pacientesTable').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: "{{ route('pacientes.index') }}",
+            columns: [
+                { data: 'name', name: 'name' },
+                { data: 'phone', name: 'phone' },
+                { data: 'id_number', name: 'id_number' },
+                { data: 'email', name: 'email' },
+                { data: 'actions', name: 'actions', orderable: false, searchable: false }
+            ],
             language: {
                 url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json',
             },
             responsive: true,
             dom: 'itrp',
             pageLength: 8,
+            drawCallback: function(settings) {
+                // Reaplica eventos o estilos si es necesario al redibujar
+            }
         });
 
         $('#customSearch').on('keyup', function() {

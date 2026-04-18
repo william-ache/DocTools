@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('app_name')->default('Santuario Clínico');
             $table->string('primary_color')->default('#00478d');
             $table->json('enabled_modules')->nullable();
+            $table->json('favorite_modules')->nullable();
             $table->timestamps();
         });
 
@@ -24,6 +25,7 @@ return new class extends Migration
             'app_name' => 'Santuario Clínico',
             'primary_color' => '#00478d',
             'enabled_modules' => json_encode(['consultorios', 'servicios', 'finanzas', 'pacientes']),
+            'favorite_modules' => json_encode([]),
             'created_at' => now(),
             'updated_at' => now(),
         ]);

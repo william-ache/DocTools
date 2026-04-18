@@ -16,11 +16,14 @@ class Consultorio extends Model
         'tenant_id',
         'name',
         'address',
+        'latitude',
+        'longitude',
         'phone',
         'indications',
         'rest_time_between_appointments',
         'max_days_anticipation',
         'standard_appointment_duration',
+        'calendar_interval',
         'timezone',
         'whatsapp_reminders',
         'accept_bookings',
@@ -33,6 +36,11 @@ class Consultorio extends Model
     public function tenant(): BelongsTo
     {
         return $this->belongsTo(Tenant::class);
+    }
+
+    public function workingHours()
+    {
+        return $this->hasMany(WorkingHour::class);
     }
 
     public function metodosPago(): BelongsToMany

@@ -48,10 +48,24 @@ const DocIaMicButton = () => {
             console.log("[WEB SPEECH START] El motor de reconocimiento nativo ha arrancado a escuchar.");
             setIsListening(true);
             setSpeechError(null);
-            ignoreRestartRef.current = false;
+            
+            // Si hay una señal de bloqueo (modal activa), abortar de inmediato y no resetear el ignore
+            if (window.isModalMicActive || document.documentElement.dataset.modalMicActive === 'true') {
+                console.log("[WEB SPEECH] Bloqueo detectado en onstart, abortando...");
+                ignoreRestartRef.current = true;
+                try { recognition.abort(); } catch(e) {}
+                return;
+            }
         };
 
         recognition.onresult = (event) => {
+            // Bloqueo total si la modal está activa
+            if (window.isModalMicActive || document.documentElement.dataset.modalMicActive === 'true') {
+                ignoreRestartRef.current = true;
+                try { recognition.abort(); } catch(e) {}
+                return;
+            }
+
             let finalTranscript = '';
             for (let i = event.resultIndex; i < event.results.length; ++i) {
                 finalTranscript += event.results[i][0].transcript.toLowerCase();
@@ -60,14 +74,11 @@ const DocIaMicButton = () => {
             // Si estamos en modo de grabación (escuchando el comando tras la palabra clave)
             if (isRecordingRef.current) {
                 console.log("[NATIVE STT] Capturando orden médica: ", finalTranscript);
-                commandTextRef.current = finalTranscript; // Almacenamos el texto de la orden
+                commandTextRef.current = finalTranscript; 
                 setDebugTranscript("Oído: " + commandTextRef.current);
                 
-                // EXTENSIÓN DE TIEMPO INTELIGENTE: Si el usuario sigue hablando, le damos más tiempo antes de cortar la orden.
-                // Cancelamos el corte inminente y le damos 5 segundos de gracia adicionales para respirar y pensar.
                 if (autoStopRef.current) clearTimeout(autoStopRef.current);
                 autoStopRef.current = setTimeout(() => stopRecordingMode(), 5000);
-                
                 return;
             }
 
@@ -76,12 +87,10 @@ const DocIaMicButton = () => {
             console.log("[SPEECH RECOGNIZED] Capturado: ", finalTranscript);
             setDebugTranscript(finalTranscript); 
             
-            // Analizar fonéticamente (Palabras de prueba)
             const wakeWords = ["asistente", "oye doctor", "hola asistente", "despierta"];
             const detected = wakeWords.some(word => finalTranscript.includes(word));
 
             if (detected) {
-                console.log("[WAKE WORD] Detección confirmada, bloqueando reingresos.");
                 isTriggeringRef.current = true;
                 setDebugTranscript("¡Dime!");
                 triggerWakeWord();
@@ -94,17 +103,23 @@ const DocIaMicButton = () => {
             console.log("[WEB SPEECH ERROR]:", event.error);
             if (event.error === 'not-allowed') {
                 ignoreRestartRef.current = true;
-                setSpeechError('Permisos de micrófono denegados por el navegador.');
+                setSpeechError('Permisos de micrófono denegados.');
+            }
+            if (window.isModalMicActive || document.documentElement.dataset.modalMicActive === 'true') {
+                ignoreRestartRef.current = true;
             }
         };
 
         recognition.onend = () => {
-            console.log("[WEB SPEECH END] El motor se ha detenido.");
+            const modalActive = window.isModalMicActive || document.documentElement.dataset.modalMicActive === 'true';
+            const shouldRestart = !isRecordingRef.current && !ignoreRestartRef.current && !isTriggeringRef.current && !modalActive;
+            
+            console.log(`[WEB SPEECH END] Re-arranque: ${shouldRestart} (Modal: ${modalActive}, Ignore: ${ignoreRestartRef.current})`);
+            
             setIsListening(false);
-            // Auto re-arrancar para lectura continua a menos que estemos grabando el audio real, o haya un error de permisos
-            if (!isRecordingRef.current && !ignoreRestartRef.current && !isTriggeringRef.current) {
+            
+            if (shouldRestart) {
                 try {
-                    console.log("[WEB SPEECH RESTART] Reiniciando escucha continua...");
                     recognition.start();
                 } catch(e) {
                     console.log("[WEB SPEECH RESTART ERROR]", e);
@@ -114,27 +129,45 @@ const DocIaMicButton = () => {
 
         recognitionRef.current = recognition;
         
-        if (isGranted) {
+        if (isGranted && !(window.isModalMicActive || document.documentElement.dataset.modalMicActive === 'true')) {
             try {
-                console.log("[WEB SPEECH INIT] isGranted es TRUE, arrancando...");
                 recognition.start();
-            } catch(e) {
-                console.log("[WEB SPEECH INIT ERROR]", e);
-            }
-        } else {
-            console.log("[WEB SPEECH INIT] isGranted es FALSE, no se arranca.");
+            } catch(e) {}
         }
-    }, [isGranted]); // Quitamos isRecording de las dependencias MUY IMPORTANTE
+    }, [isGranted]); 
 
-    // Arrancar el "listening" automático en cuanto tengamos permiso
     useEffect(() => {
-        if (isGranted) {
-            setupSpeechRecognition();
-        }
+        if (isGranted) setupSpeechRecognition();
+
+        const handleModalMicChange = (e) => {
+            if (e.detail.active) {
+                console.log("[GLOBAL MIC] >>> BLOQUEO TOTAL ACTIVADO");
+                ignoreRestartRef.current = true;
+                window.isModalMicActive = true;
+                document.documentElement.dataset.modalMicActive = 'true';
+                if (recognitionRef.current) {
+                    try { recognitionRef.current.abort(); } catch(e) {}
+                }
+            } else {
+                console.log("[GLOBAL MIC] <<< BLOQUEO LIBERADO");
+                window.isModalMicActive = false;
+                document.documentElement.dataset.modalMicActive = 'false';
+                ignoreRestartRef.current = false;
+                setTimeout(() => {
+                    if (recognitionRef.current && !isRecordingRef.current && !isTriggeringRef.current && !window.isModalMicActive) {
+                        try { recognitionRef.current.start(); } catch(e) {}
+                    }
+                }, 1000);
+            }
+        };
+
+        window.addEventListener('modalMicStateChanged', handleModalMicChange);
+
         return () => {
+            window.removeEventListener('modalMicStateChanged', handleModalMicChange);
             if (recognitionRef.current) {
                 ignoreRestartRef.current = true;
-                recognitionRef.current.stop();
+                try { recognitionRef.current.abort(); } catch(e) {}
             }
         };
     }, [isGranted, setupSpeechRecognition]);

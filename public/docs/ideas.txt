@@ -14,6 +14,16 @@ que se pueda registrar por google y autocomplete nombre apellido y que ponga num
 
 que al estar en el sistema el microfono siempre este activado para el asistente de virtual
 
+notificaciones push y notificaciones por el sistema en tiempo real
+
+y configurar horarios del profesional
+
+un bot de whatsapp que pueda enviar recordatorios de citas y que pueda recibir mensajes de los pacientes y que pueda responder a los pacientes y que pueda enviar informes y otras cosas atrasvez de whatsapp del paciente
+
+que todas las tablas, se puedan exportar como excel o pdf
+
+horarios por consultorios
+
 https://www.instagram.com/docguia.inc/
 
 https://www.docguia.com/
