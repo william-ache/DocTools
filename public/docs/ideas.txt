@@ -24,6 +24,9 @@ que todas las tablas, se puedan exportar como excel o pdf
 
 horarios por consultorios
 
+revisar funcionalidad de empleados
+
+
 https://www.instagram.com/docguia.inc/
 
 https://www.docguia.com/
