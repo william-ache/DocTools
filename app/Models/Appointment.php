@@ -12,7 +12,6 @@ class Appointment extends Model
     use HasFactory, HasUuids;
 
     protected $fillable = [
-        'tenant_id',
         'consultorio_id',
         'patient_id',
         'start_time',

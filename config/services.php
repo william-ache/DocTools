@@ -39,4 +39,9 @@ return [
         'key' => env('OPENAI_API_KEY'),
     ],
 
+    'assistant' => [
+        'name' => env('VITE_ASSISTANT_NAME', 'DocIA'),
+        'enabled' => env('VITE_ASSISTANT_ENABLED', true),
+    ],
+
 ];

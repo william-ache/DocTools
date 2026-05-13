@@ -15,7 +15,6 @@ class MetodoPago extends Model
     protected $table = 'metodos_pago';
 
     protected $fillable = [
-        'tenant_id',
         'name',
         'type',
         'color',
@@ -24,13 +23,6 @@ class MetodoPago extends Model
         'is_active',
     ];
 
-    /**
-     * Get the tenant that owns the payment method.
-     */
-    public function tenant(): BelongsTo
-    {
-        return $this->belongsTo(Tenant::class);
-    }
 
     public function consultorios(): BelongsToMany
     {

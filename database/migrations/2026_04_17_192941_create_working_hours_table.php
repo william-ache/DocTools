@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('working_hours', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('tenant_id')->index();
             $table->foreignUuid('consultorio_id')->constrained()->onDelete('cascade');
             $table->integer('day_of_week'); // 0 (Domingo) - 6 (Sábado)
             $table->time('start_time');

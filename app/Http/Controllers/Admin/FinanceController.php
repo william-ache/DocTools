@@ -15,21 +15,17 @@ class FinanceController extends Controller
 {
     public function index()
     {
-        $tenantId = Auth::user()->tenant_id;
-        
-        $cobros = Cobro::where('tenant_id', $tenantId)
-            ->with(['patient', 'metodoPago'])
+        $cobros = Cobro::with(['patient', 'metodoPago'])
             ->latest('payment_date')
             ->get();
             
-        $employeePayments = EmployeePayment::where('tenant_id', $tenantId)
-            ->with('employee')
+        $employeePayments = EmployeePayment::with('employee')
             ->latest('payment_date')
             ->get();
             
-        $metodos = MetodoPago::where('tenant_id', $tenantId)->get();
-        $pacientes = Patient::where('tenant_id', $tenantId)->orderBy('name')->get();
-        $empleados = Employee::where('tenant_id', $tenantId)->where('is_active', true)->orderBy('name')->get();
+        $metodos = MetodoPago::all();
+        $pacientes = Patient::orderBy('name')->get();
+        $empleados = Employee::where('is_active', true)->orderBy('name')->get();
 
         return view('admin.finanzas.index', compact('cobros', 'employeePayments', 'metodos', 'pacientes', 'empleados'));
     }
@@ -44,7 +40,6 @@ class FinanceController extends Controller
             'reference' => 'nullable|string',
         ]);
 
-        $validated['tenant_id'] = Auth::user()->tenant_id;
         $validated['status'] = 'paid';
 
         EmployeePayment::create($validated);
@@ -54,7 +49,7 @@ class FinanceController extends Controller
 
     public function destroyEmployeePayment($id)
     {
-        $payment = EmployeePayment::where('tenant_id', Auth::user()->tenant_id)->findOrFail($id);
+        $payment = EmployeePayment::findOrFail($id);
         $payment->delete();
 
         return back()->with('success', 'Registro de pago eliminado.');
@@ -72,7 +67,6 @@ class FinanceController extends Controller
             'notes' => 'nullable|string',
         ]);
 
-        $validated['tenant_id'] = Auth::user()->tenant_id;
         $validated['status'] = 'completado';
 
         Cobro::create($validated);
@@ -82,7 +76,7 @@ class FinanceController extends Controller
 
     public function updateCobro(Request $request, $id)
     {
-        $cobro = Cobro::where('tenant_id', Auth::user()->tenant_id)->findOrFail($id);
+        $cobro = Cobro::findOrFail($id);
 
         $validated = $request->validate([
             'patient_id' => 'required|exists:patients,id',
@@ -101,7 +95,7 @@ class FinanceController extends Controller
 
     public function destroyCobro($id)
     {
-        $cobro = Cobro::where('tenant_id', Auth::user()->tenant_id)->findOrFail($id);
+        $cobro = Cobro::findOrFail($id);
         $cobro->delete();
 
         return back()->with('success', 'Cobro eliminado.');

@@ -13,7 +13,6 @@ class Servicio extends Model
     use HasFactory, HasUuids;
 
     protected $fillable = [
-        'tenant_id',
         'name',
         'description',
         'price',
@@ -24,13 +23,6 @@ class Servicio extends Model
         'is_active',
     ];
 
-    /**
-     * Get the tenant that owns the service.
-     */
-    public function tenant(): BelongsTo
-    {
-        return $this->belongsTo(Tenant::class);
-    }
 
     public function consultorios(): BelongsToMany
     {

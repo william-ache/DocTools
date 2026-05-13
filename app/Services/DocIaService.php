@@ -32,27 +32,22 @@ class DocIaService
             return ['content' => "❌ Error: No se ha configurado la OPENAI_API_KEY o URL Local en el archivo .env"];
         }
 
-        $systemPrompt = "Eres 'DocIA', la Mente Maestra con LIBERTAD TOTAL sobre el SaaS Médico Consultia.\n" .
-                        "Tu objetivo es entender profundamente lo que el doctor te pide por voz, inferir sus intenciones creativamente y comunicarte con la Base de Datos.\n" .
-                        "Modelos y sus esquemas disponibles:\n" .
-                        "- Patient: name, id_number, phone, email, gender, address, antecedentes\n" .
-                        "- Consultorio: name, location, phone, is_active\n" .
-                        "- Servicio: name, description, price, is_active\n" .
-                        "- MetodoPago: name, type, color, icon, details, is_active\n" .
-                        "- Setting: app_name\n\n" .
-
-                        "Tienes libertad absoluta. Respeta HEX e íconos FontAwesome. IMPORTANTE: Si la voz exige múltiples cosas complejas (Ej: borrar duplicados y/o editar a la vez), puedes generar MÚLTIPLES BLOQUES uno detrás del otro.\n" .
-                        "Responde ÚNICAMENTE con los bloques mágicos:\n\n" .
-
-                        "[OMNI_ACTION]\n" .
-                        "action: {CREATE|UPDATE|DELETE|NAVIGATE}\n" .
-                        "model: {Patient|Consultorio|Servicio|MetodoPago|Setting}\n" .
-                        "target: {Nombre exacto buscado si es update/delete/navigate, sino null}\n" .
-                        "{cualquier_campo_db_en_minuscula}: {tu deduccion}\n" .
-                        "[/OMNI_ACTION]";
+        $assistantName = config('services.assistant.name', 'DocIA');
+        $systemPrompt = "Eres '{$assistantName}', el Omnipotente del SaaS Médico Consultia.\n" .
+                        "Si el usuario pide varias cosas, DEBES repetir el bloque [OMNI_ACTION] para cada una.\n\n" .
+                        "EJEMPLO PARE 2 PACIENTES:\n" .
+                        "[OMNI_ACTION]\naction: CREATE\nmodel: Patient\nname: Juan\n[/OMNI_ACTION]\n" .
+                        "[OMNI_ACTION]\naction: CREATE\nmodel: Patient\nname: Pedro\n[/OMNI_ACTION]\n\n" .
+                        "CAMPOS:\n" .
+                        "- Patient: name, id_number, phone, email, gender\n" .
+                        "- Servicio: name, description, price\n" .
+                        "- MetodoPago: name, type, color\n" .
+                        "FORMATO:\n" .
+                        "[OMNI_ACTION]\naction: {CREATE|UPDATE|DELETE|NAVIGATE}\nmodel: {Patient|Consultorio|Servicio|MetodoPago|Setting}\ntarget: {Nombre o ALL}\n[/OMNI_ACTION]";
 
         try {
             $response = Http::withToken($this->apiKey)
+                ->timeout(120)
                 ->post("{$this->baseUrl}/chat/completions", [
                     'model' => $this->model,
                     'messages' => [
@@ -111,12 +106,15 @@ class DocIaService
         foreach ($lines as $line) {
             if (strpos($line, ':') !== false) {
                 [$key, $val] = explode(':', $line, 2);
-                $key = strtolower(trim($key)); // Forzar minúsculas para que Eloquent no ignore campos por Capitalización
+                $key = strtolower(trim($key)); 
                 $val = trim($val);
+                // Limpiar comillas extras que modelos como Qwen suelen poner
+                $val = trim($val, "\"'");
                 // Ignorar literales null
                 $payload[$key] = (strtolower($val) !== 'null' && $val !== '') ? $val : null;
             }
         }
+    
 
         $action = strtoupper($payload['action'] ?? '');
         // Aseguramos que el Modelo comience con mayúscula como lo pide Laravel (MetodoPago)
@@ -124,15 +122,42 @@ class DocIaService
         foreach(['Patient', 'Consultorio', 'Servicio', 'MetodoPago', 'Setting'] as $m) {
             if (strtolower($payload['model'] ?? '') === strtolower($m)) $modelName = $m;
         }
-        $target = $payload['target'] ?? null;
+        $target = $payload['target'] ?? $payload['name'] ?? $payload['nombre'] ?? $payload['paciente'] ?? null;
 
-        unset($payload['action'], $payload['model'], $payload['target']); // El resto son campos limpios para DB
+        // MAPEO DE SINÓNIMOS PARA MODELOS PEQUEÑOS (Qwen/Phi3)
+        $synonyms = [
+            'nombre' => 'name',
+            'paciente' => 'name',
+            'apellido' => 'name',
+            'telefono' => 'phone',
+            'celular' => 'phone',
+            'correo' => 'email',
+            'cedula' => 'id_number',
+            'dni' => 'id_number',
+            'direccion' => 'address',
+            'ubicacion' => 'location',
+            'precio' => 'price',
+        ];
+
+        foreach ($synonyms as $bad => $good) {
+            if (isset($payload[$bad])) {
+                $payload[$good] = $payload[$bad];
+                if ($bad !== $good) unset($payload[$bad]);
+            }
+        }
+
+        // Si es una creación y no tenemos 'name', pero tenemos 'target', lo usamos.
+        if (!isset($payload['name']) && $target) {
+            $payload['name'] = $target;
+        }
+
+        unset($payload['action'], $payload['model'], $payload['target']); 
 
         // Seguridad: Limitar modelos permitidos
-        $allowedModels = ['Patient', 'Consultorio', 'Servicio', 'MetodoPago', 'Setting'];
+        $allowedModels = ['Patient', 'Consultorio', 'Servicio', 'MetodoPago', 'Setting', 'Finanzas', 'Calendario', 'Personal', 'Plantilla', 'Dashboard'];
         
         if ($action === 'NAVIGATE') {
-            return $this->handleNavigate($target ?? $modelName);
+            return $this->handleNavigate($target ?? $payload['model'] ?? $modelName);
         }
 
         if (!in_array($modelName, $allowedModels)) {
@@ -145,10 +170,6 @@ class DocIaService
             // Acción: CREAR
             if ($action === 'CREATE') {
                 $payload['id'] = (string) Str::uuid();
-                if (in_array('tenant_id', app($modelClass)->getFillable())) {
-                    $payload['tenant_id'] = auth()->user()->tenant_id ?? (string) Str::uuid();
-                }
-                
                 $instance = $modelClass::create($payload);
                 $routeName = $this->getRouteNameForModel($modelName);
                 
@@ -163,8 +184,31 @@ class DocIaService
             if (in_array($action, ['DELETE', 'UPDATE'])) {
                 if (!$target) return ['content' => "⚠️ Para editar o eliminar, debes mencionar el nombre del registro buscado."];
                 
-                // Construcción de Query Dinámica Resiliente
-                $query = $modelClass::where('name', 'LIKE', "%{$target}%");
+                // --- NUEVO: SOPORTE PARA OPERACIONES MASIVAS ---
+                if (in_array(strtoupper($target), ['ALL', 'TODOS', 'EVERYTHING'])) {
+                    $count = $modelClass::count();
+                    if ($action === 'DELETE') {
+                        $modelClass::query()->delete();
+                        $routeName = $this->getRouteNameForModel($modelName);
+                        return [
+                            'content' => "🗑️ **Purificación Completa:** He eliminado los {$count} registros del módulo **{$modelName}**.",
+                            'action' => 'redirect',
+                            'url' => route($routeName)
+                        ];
+                    }
+                    if ($action === 'UPDATE') {
+                        $modelClass::query()->update(array_filter($payload));
+                        $routeName = $this->getRouteNameForModel($modelName);
+                        return [
+                            'content' => "✏️ **Actualización Masiva:** Se han modificado {$count} registros de **{$modelName}**.",
+                            'action' => 'redirect',
+                            'url' => route($routeName)
+                        ];
+                    }
+                }
+
+                // Construcción de Query Dinámica Resiliente (Búsqueda Individual)
+                $query = $modelClass::whereRaw('name LIKE ? COLLATE NOCASE', ["%" . $target . "%"]);
                 
                 // Solo si el modelo actual soporta el campo "id_number", agregamos el filtro condicional
                 if (in_array('id_number', app($modelClass)->getFillable())) {
@@ -191,7 +235,7 @@ class DocIaService
                 }
 
                 if ($action === 'UPDATE') {
-                    $instance->update(array_filter($payload)); // Actualiza solo con lo que no es null
+                    $instance->update($payload); 
                     $routeName = $this->getRouteNameForModel($modelName);
                     return [
                         'content' => "✏️ **Mutación Exitosa:** Registo de {$instance->name} actualizado masivamente.",
@@ -228,19 +272,31 @@ class DocIaService
      */
     protected function handleNavigate(string $destination)
     {
-        $destination = strtolower($destination);
-        $url = url('/'); // Default
+        $d = strtolower(trim($destination));
+        Log::info("DocIA Navigating to: [" . $d . "]");
+        
+        $url = route('admin.dashboard'); 
 
-        if (str_contains($destination, 'paciente')) {
+        if (str_contains($d, 'pacient') || str_contains($d, 'patient')) {
             $url = route('pacientes.index');
-        } elseif (str_contains($destination, 'dashboard') || str_contains($destination, 'panel')) {
-            $url = route('admin.dashboard');
-        } elseif (str_contains($destination, 'configuracion') || str_contains($destination, 'ajuste') || str_contains($destination, 'setting')) {
+        } elseif (str_contains($d, 'servici') || str_contains($d, 'service')) {
+            $url = route('servicios.index');
+        } elseif (str_contains($d, 'consultorio') || str_contains($d, 'clinic')) {
+            $url = route('consultorios.index');
+        } elseif (str_contains($d, 'pago') || str_contains($d, 'metodo') || str_contains($d, 'finanza') || str_contains($d, 'cobro')) {
+            $url = route('finanzas.index');
+        } elseif (str_contains($d, 'config') || str_contains($d, 'ajuste') || str_contains($d, 'setting')) {
             $url = route('settings.index');
+        } elseif (str_contains($d, 'personal') || str_contains($d, 'empleado') || str_contains($d, 'employee')) {
+            $url = route('employees.index');
+        } elseif (str_contains($d, 'calendar') || str_contains($d, 'cita') || str_contains($d, 'horario')) {
+            $url = route('admin.calendario');
+        } elseif (str_contains($d, 'plantilla') || str_contains($d, 'template')) {
+            $url = route('templates.index');
         }
 
         return [
-            'content' => "🚀 Permiso concedido. Llevándote a hipervelocidad hacia la central de **{$destination}**.",
+            'content' => "🚀 Llevándote a **" . ucfirst($destination) . "**.",
             'action' => 'redirect',
             'url' => $url
         ];

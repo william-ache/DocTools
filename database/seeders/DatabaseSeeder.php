@@ -6,7 +6,6 @@ use App\Models\User;
 use App\Models\MetodoPago;
 use App\Models\Servicio;
 use App\Models\Setting;
-use App\Models\Tenant;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -17,21 +16,11 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // 1. Crear el Tenant Base (SaaS)
-        $tenant = Tenant::updateOrCreate(
-            ['name' => 'Santuario Clínico Base'],
-            [
-                'domain' => 'santuario.test',
-                'plan' => 'enterprise',
-                'is_active' => true,
-            ]
-        );
 
         // 2. Usuario Administrador Base vinculado al Tenant
         User::updateOrCreate(
             ['email' => 'admin@doctools.com'],
             [
-                'tenant_id' => $tenant->id,
                 'name' => 'Dr. Javier Admin',
                 'specialty' => 'Otorrinolaringólogo',
                 'password' => Hash::make('ServBay.dev'),
@@ -58,8 +47,7 @@ class DatabaseSeeder extends Seeder
         ];
 
         foreach ($metodos as $m) {
-            $m['tenant_id'] = $tenant->id;
-            MetodoPago::updateOrCreate(['name' => $m['name'], 'tenant_id' => $tenant->id], $m);
+            MetodoPago::updateOrCreate(['name' => $m['name']], $m);
         }
 
         // 5. Servicios Premium vinculados al Tenant
@@ -94,8 +82,7 @@ class DatabaseSeeder extends Seeder
         ];
 
         foreach ($servicios as $s) {
-            $s['tenant_id'] = $tenant->id;
-            Servicio::updateOrCreate(['name' => $s['name'], 'tenant_id' => $tenant->id], $s);
+            Servicio::updateOrCreate(['name' => $s['name']], $s);
         }
     }
 }

@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('doc_ia_interactions', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('tenant_id')->constrained()->onDelete('cascade');
             $table->string('type')->nullable(); // transcription, diagnosis_help, etc.
             $table->json('payload')->nullable(); // interaction data
             $table->text('response')->nullable(); // IA response

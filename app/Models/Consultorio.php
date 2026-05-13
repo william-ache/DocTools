@@ -13,7 +13,6 @@ class Consultorio extends Model
     use HasFactory, HasUuids;
 
     protected $fillable = [
-        'tenant_id',
         'name',
         'address',
         'latitude',
@@ -30,13 +29,6 @@ class Consultorio extends Model
         'booking_notifications',
     ];
 
-    /**
-     * Get the tenant that owns the consultorio.
-     */
-    public function tenant(): BelongsTo
-    {
-        return $this->belongsTo(Tenant::class);
-    }
 
     public function workingHours()
     {

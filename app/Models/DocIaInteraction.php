@@ -12,7 +12,6 @@ class DocIaInteraction extends Model
     use HasFactory, HasUuids;
 
     protected $fillable = [
-        'tenant_id',
         'type',
         'payload',
         'response',
@@ -22,11 +21,4 @@ class DocIaInteraction extends Model
         'payload' => 'array',
     ];
 
-    /**
-     * Get the tenant that owns the interaction log.
-     */
-    public function tenant(): BelongsTo
-    {
-        return $this->belongsTo(Tenant::class);
-    }
 }

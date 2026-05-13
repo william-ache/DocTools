@@ -23,6 +23,14 @@ class DocIaController extends Controller
      */
     public function processVoice(Request $request)
     {
+        if (!config('services.assistant.enabled')) {
+            $assistantName = config('services.assistant.name', 'asistente virtual');
+            return response()->json([
+                'transcription' => '[Sistema]',
+                'response' => "❌ **Servicio Deshabilitado**: El {$assistantName} no está activo actualmente."
+            ], 403);
+        }
+
         // Verificar API Key o configuración base rápidamente
         if (!config('services.openai.key') && !env('OPENAI_API_KEY')) {
             return response()->json([

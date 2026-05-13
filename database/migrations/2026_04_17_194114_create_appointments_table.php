@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('appointments', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->uuid('tenant_id');
             $table->uuid('consultorio_id')->nullable();
             $table->uuid('patient_id')->nullable();
             $table->datetime('start_time');

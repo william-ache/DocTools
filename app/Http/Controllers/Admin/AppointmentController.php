@@ -11,8 +11,7 @@ class AppointmentController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Appointment::where('tenant_id', Auth::user()->tenant_id)
-            ->with(['patient', 'consultorio']);
+        $query = Appointment::with(['patient', 'consultorio']);
 
         // Filtrar por rango de fechas (enviado por FullCalendar)
         if ($request->has('start') && $request->has('end')) {
@@ -65,7 +64,6 @@ class AppointmentController extends Controller
             'status' => 'required|string',
         ]);
 
-        $validated['tenant_id'] = Auth::user()->tenant_id;
 
         $appointment = Appointment::create($validated);
 
@@ -78,7 +76,7 @@ class AppointmentController extends Controller
 
     public function update(Request $request, $id)
     {
-        $appointment = Appointment::where('tenant_id', Auth::user()->tenant_id)->findOrFail($id);
+        $appointment = Appointment::findOrFail($id);
 
         $validated = $request->validate([
             'patient_id' => 'sometimes|exists:patients,id',
@@ -100,7 +98,7 @@ class AppointmentController extends Controller
 
     public function destroy($id)
     {
-        $appointment = Appointment::where('tenant_id', Auth::user()->tenant_id)->findOrFail($id);
+        $appointment = Appointment::findOrFail($id);
         $appointment->delete();
 
         return response()->json([

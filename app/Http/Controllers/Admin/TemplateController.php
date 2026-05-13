@@ -11,8 +11,7 @@ class TemplateController extends Controller
 {
     public function index()
     {
-        $templates = Template::where('tenant_id', Auth::user()->tenant_id)
-            ->latest()
+        $templates = Template::latest()
             ->get();
         return view('admin.templates.index', compact('templates'));
     }
@@ -26,7 +25,6 @@ class TemplateController extends Controller
             'content' => 'required|string',
         ]);
 
-        $validated['tenant_id'] = Auth::user()->tenant_id;
 
         Template::create($validated);
 
@@ -36,9 +34,6 @@ class TemplateController extends Controller
 
     public function update(Request $request, Template $template)
     {
-        if ($template->tenant_id !== Auth::user()->tenant_id) {
-            abort(403);
-        }
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -55,9 +50,6 @@ class TemplateController extends Controller
 
     public function destroy(Template $template)
     {
-        if ($template->tenant_id !== Auth::user()->tenant_id) {
-            abort(403);
-        }
 
         $template->delete();
 
@@ -67,9 +59,6 @@ class TemplateController extends Controller
 
     public function toggleStatus(Template $template)
     {
-        if ($template->tenant_id !== Auth::user()->tenant_id) {
-            abort(403);
-        }
 
         $template->update([
             'is_active' => !$template->is_active

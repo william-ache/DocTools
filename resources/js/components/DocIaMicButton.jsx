@@ -14,6 +14,9 @@ const DocIaMicButton = () => {
     const [isProcessing, setIsProcessing] = useState(false);
     const [speechError, setSpeechError] = useState(null);
     const [debugTranscript, setDebugTranscript] = useState("");
+
+    const assistantName = import.meta.env.VITE_ASSISTANT_NAME || "DocIA";
+    const assistantEnabled = import.meta.env.VITE_ASSISTANT_ENABLED === 'true';
     
     const mediaRecorderRef = useRef(null); // Ya no se usa para enviar backend, solo cosmético si se quiere
     const timerRef = useRef(null);
@@ -78,19 +81,18 @@ const DocIaMicButton = () => {
                 setDebugTranscript("Oído: " + commandTextRef.current);
                 
                 if (autoStopRef.current) clearTimeout(autoStopRef.current);
-                autoStopRef.current = setTimeout(() => stopRecordingMode(), 5000);
+                autoStopRef.current = setTimeout(() => stopRecordingMode(), 1500);
                 return;
             }
 
             if (isTriggeringRef.current) return;
             
-            console.log("[SPEECH RECOGNIZED] Capturado: ", finalTranscript);
+            const currentName = assistantName.toLowerCase();
+            console.log(`[SPEECH] Capturado: "${finalTranscript}" | WakeWord: "${currentName}"`);
             setDebugTranscript(finalTranscript); 
             
-            const wakeWords = ["asistente", "oye doctor", "hola asistente", "despierta"];
-            const detected = wakeWords.some(word => finalTranscript.includes(word));
-
-            if (detected) {
+            if (finalTranscript.includes(currentName)) {
+                console.log(`[WAKE WORD] Detetado: ${currentName}`);
                 isTriggeringRef.current = true;
                 setDebugTranscript("¡Dime!");
                 triggerWakeWord();
@@ -178,8 +180,8 @@ const DocIaMicButton = () => {
         setTimeout(() => setWakeWordDetected(false), 2000);
         commandTextRef.current = ""; // Limpiar comandos previos
         startRecordingMode();
-        // Inicializamos con 7 segundos iniciales para permitir arrancar a hablar, pero esto se retroalimentará (reseteará) cada vez que hable.
-        autoStopRef.current = setTimeout(() => stopRecordingMode(), 7000); 
+        // Inicializamos con 3 segundos iniciales para permitir arrancar a hablar.
+        autoStopRef.current = setTimeout(() => stopRecordingMode(), 3000); 
     };
 
     const startRecordingMode = useCallback(() => {
@@ -238,6 +240,8 @@ const DocIaMicButton = () => {
         }
     };
 
+    if (!assistantEnabled) return null;
+
     return (
         <div className="flex flex-col items-center relative">
             {/* Modal de Respuesta IA */}
@@ -248,7 +252,7 @@ const DocIaMicButton = () => {
                             <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white text-xs">
                                 <i className="fa-solid fa-brain"></i>
                             </div>
-                            <span className="text-xs font-black uppercase tracking-tighter text-primary">DocIA Responde</span>
+                            <span className="text-xs font-black uppercase tracking-tighter text-primary">{assistantName} Responde</span>
                         </div>
                         <button onClick={() => setLastResponse(null)} className="text-gray-400 hover:text-red-500">
                             <i className="fa-solid fa-xmark"></i>

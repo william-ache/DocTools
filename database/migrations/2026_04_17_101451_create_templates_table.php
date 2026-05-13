@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('templates', function (Blueprint $table) {
             $table->id();
-            $table->foreignUuid('tenant_id')->constrained()->onDelete('cascade');
             $table->string('name');
             $table->string('icon')->default('fa-file-lines');
             $table->string('color')->default('#4f46e5');

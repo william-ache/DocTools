@@ -11,7 +11,7 @@ class PatientController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax() && !$request->has('q')) {
-            $query = Patient::where('tenant_id', auth()->user()->tenant_id);
+            $query = Patient::query();
 
             // Search
             if ($request->has('search') && $request->input('search.value')) {
@@ -61,7 +61,7 @@ class PatientController extends Controller
             ]);
         }
 
-        $pacientes = Patient::where('tenant_id', auth()->user()->tenant_id)->latest()->limit(10)->get();
+        $pacientes = Patient::latest()->limit(10)->get();
         return view('admin.pacientes.index', compact('pacientes'));
     }
 
@@ -73,7 +73,6 @@ class PatientController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'tenant_id' => 'required|uuid',
             'name' => 'required',
             'id_number' => 'nullable',
             'birth_date' => 'nullable|date',
@@ -96,8 +95,7 @@ class PatientController extends Controller
 
     public function show(Patient $paciente)
     {
-        $templates = \App\Models\Template::where('tenant_id', auth()->user()->tenant_id)
-            ->where('is_active', true)
+        $templates = \App\Models\Template::where('is_active', true)
             ->get();
             
         return view('admin.pacientes.show', compact('paciente', 'templates'));
@@ -130,8 +128,7 @@ class PatientController extends Controller
     public function search(Request $request)
     {
         $search = $request->input('q');
-        $pacientes = Patient::where('tenant_id', auth()->user()->tenant_id)
-            ->where(function($query) use ($search) {
+        $pacientes = Patient::where(function($query) use ($search) {
                 $query->where('name', 'LIKE', "%$search%")
                       ->orWhere('id_number', 'LIKE', "%$search%");
             })

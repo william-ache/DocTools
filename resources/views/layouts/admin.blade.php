@@ -364,7 +364,7 @@
             </nav>
 
             <div class="sidebar-footer pt-4 border-t border-surface-container space-y-3">
-                <!-- Trial Status Card -->
+                <!-- Trial Status Card Oculto temporalmente
                 <div class="sidebar-text p-3 rounded-2xl bg-primary/5 border border-primary/10">
                     <div class="flex items-center justify-between mb-2">
                         <div class="flex items-center gap-1.5">
@@ -381,6 +381,7 @@
                         <i class="fa-solid fa-arrow-up-right-from-square text-[8px]"></i>
                     </a>
                 </div>
+                -->
 
                 <!-- User Profile Footer -->
                 <div class="flex items-center gap-3 px-2 py-2 rounded-xl bg-surface-container-low/50 border border-surface-container/50">

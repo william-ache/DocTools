@@ -10,7 +10,6 @@ class WorkingHour extends Model
     use HasUuids;
 
     protected $fillable = [
-        'tenant_id',
         'consultorio_id',
         'day_of_week',
         'start_time',

@@ -21,6 +21,14 @@ Route::get('/calendario', function () {
     return view('calendario');
 });
 
+Route::get('/politica-privacidad', function () {
+    return view('politica-privacidad');
+})->name('politica-privacidad');
+
+Route::get('/cookies', function () {
+    return view('cookies');
+})->name('cookies');
+
 // Autenticación
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
@@ -33,8 +41,8 @@ Route::middleware(['auth'])->group(function () {
     })->name('admin.dashboard');
 
     Route::get('/admin/calendario', function () {
-        $consultorios = \App\Models\Consultorio::where('tenant_id', Auth::user()->tenant_id)->get();
-        $pacientes = \App\Models\Patient::where('tenant_id', Auth::user()->tenant_id)->latest()->get();
+        $consultorios = \App\Models\Consultorio::all();
+        $pacientes = \App\Models\Patient::latest()->get();
         return view('admin.calendario', compact('consultorios', 'pacientes'));
     })->name('admin.calendario');
 

@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('metodos_pago', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('tenant_id')->constrained()->onDelete('cascade');
             $table->string('name');
             $table->string('type')->default('Digital'); // Digital, Cash, Crypto
             $table->string('color')->nullable();

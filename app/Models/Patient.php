@@ -13,7 +13,6 @@ class Patient extends Model
     use HasFactory, HasUuids;
 
     protected $fillable = [
-        'tenant_id',
         'name',
         'id_number',
         'birth_date',
@@ -30,13 +29,6 @@ class Patient extends Model
         'allergies' => 'array',
     ];
 
-    /**
-     * Get the tenant that owns the patient.
-     */
-    public function tenant(): BelongsTo
-    {
-        return $this->belongsTo(Tenant::class);
-    }
 
     /**
      * Get the consultations for the patient.

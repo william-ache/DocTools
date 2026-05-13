@@ -12,7 +12,6 @@ class Cobro extends Model
     use HasFactory, HasUuids;
 
     protected $fillable = [
-        'tenant_id',
         'patient_id',
         'appointment_id',
         'metodo_pago_id',
@@ -31,10 +30,6 @@ class Cobro extends Model
         'exchange_rate' => 'decimal:4',
     ];
 
-    public function tenant(): BelongsTo
-    {
-        return $this->belongsTo(Tenant::class);
-    }
 
     public function patient(): BelongsTo
     {

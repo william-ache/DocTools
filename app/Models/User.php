@@ -13,7 +13,6 @@ class User extends Authenticatable
     use HasFactory, Notifiable, HasUuids;
 
     protected $fillable = [
-        'tenant_id',
         'name',
         'email',
         'specialty',
@@ -34,11 +33,4 @@ class User extends Authenticatable
         ];
     }
 
-    /**
-     * Get the tenant that owns the user.
-     */
-    public function tenant(): BelongsTo
-    {
-        return $this->belongsTo(Tenant::class);
-    }
 }

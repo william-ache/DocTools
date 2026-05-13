@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 class EmployeePayment extends Model
 {
     protected $fillable = [
-        'tenant_id',
         'employee_id',
         'amount',
         'payment_date',
@@ -25,8 +24,4 @@ class EmployeePayment extends Model
         return $this->belongsTo(Employee::class);
     }
 
-    public function tenant()
-    {
-        return $this->belongsTo(Tenant::class);
-    }
 }

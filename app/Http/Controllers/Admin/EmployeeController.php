@@ -11,10 +11,9 @@ class EmployeeController extends Controller
 {
     public function index(Request $request)
     {
-        $tenantId = Auth::user()->tenant_id;
 
         if ($request->ajax()) {
-            $baseQuery = Employee::where('tenant_id', $tenantId);
+            $baseQuery = Employee::query();
             $recordsTotal = (clone $baseQuery)->count();
             
             $query = (clone $baseQuery)->withCount('payments');
@@ -84,7 +83,7 @@ class EmployeeController extends Controller
             ]);
         }
 
-        $employees = Employee::where('tenant_id', $tenantId)->get();
+        $employees = Employee::all();
         return view('admin.employees.index', compact('employees'));
     }
 
@@ -98,7 +97,6 @@ class EmployeeController extends Controller
             'salary' => 'required|numeric|min:0',
         ]);
 
-        $validated['tenant_id'] = Auth::user()->tenant_id;
         $validated['is_active'] = true;
 
         Employee::create($validated);
@@ -108,7 +106,7 @@ class EmployeeController extends Controller
 
     public function update(Request $request, string $id)
     {
-        $employee = Employee::where('tenant_id', Auth::user()->tenant_id)->findOrFail($id);
+        $employee = Employee::findOrFail($id);
         
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -126,7 +124,7 @@ class EmployeeController extends Controller
 
     public function destroy(string $id)
     {
-        $employee = Employee::where('tenant_id', Auth::user()->tenant_id)->findOrFail($id);
+        $employee = Employee::findOrFail($id);
         $employee->delete();
 
         return back()->with('success', 'Empleado eliminado.');
